@@ -77,14 +77,14 @@ class PaymentService
         $simpleStatus = $this->orderPaymentInterface->getSimpleStatusByOrderId($orderId);
         $order = $simpleStatus->order;
 
-        $paymentCourseTransaction = $this->courseTransactionRepository->getByOrderId($orderId);
+        $transaction = $this->courseTransactionRepository->getByOrderId($orderId);
 
-        if($paymentCourseTransaction) {
-            throw new \Exception('Error occurred', Response::HTTP_INTERNAL_SERVER_ERROR);
+        if(is_null($transaction)) {
+            throw new \Exception('Payment Course Transaction not found', Response::HTTP_NOT_FOUND);
         }
 
         if ($order->status === 'FullyPaid') {
-            $coursesIds = explode(',', $paymentCourseTransaction->course_id);
+            $coursesIds = explode(',', $transaction->course_id);
             $this->soldCourseRepository->activeStatusByUserId($userId, $coursesIds);
             $this->courseTransactionRepository->activateByOrderId($orderId);
             return true;
