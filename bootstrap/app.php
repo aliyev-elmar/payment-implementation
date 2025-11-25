@@ -3,6 +3,7 @@
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
+use Illuminate\Http\Response;
 
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
@@ -15,5 +16,11 @@ return Application::configure(basePath: dirname(__DIR__))
         //
     })
     ->withExceptions(function (Exceptions $exceptions): void {
-        //
+        $exceptions->render(function (\App\Exceptions\Payment\CreateOrderException $exception) {
+            return response()->json(['message' => $exception->getMessage()], $exception->statusCode);
+        });
+
+        $exceptions->render(function (\App\Exceptions\Payment\PaymentIsRequiredException $exception) {
+            return response()->json(['message' => $exception->getMessage()], Response::HTTP_PAYMENT_REQUIRED);
+        });
     })->create();
