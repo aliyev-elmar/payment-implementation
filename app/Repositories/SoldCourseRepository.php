@@ -48,10 +48,10 @@ class  SoldCourseRepository
 
     /**
      * @param int $userId
-     * @param int $coursesId
+     * @param array $coursesId
      * @return void
      */
-    public function activeStatusByUserId(int $userId, int $coursesId): void
+    public function activeStatusByUserId(int $userId, array $coursesId): void
     {
         SoldCourse::query()
             ->where('euser_id', $userId)

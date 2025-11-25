@@ -2,7 +2,7 @@
 
 namespace App\Repositories\Payment;
 
-use App\DataTransferObjects\Payment\{DetailedStatusDto, SimpleStatusDto};
+use App\DataTransferObjects\Payment\{DetailedStatusDto, OrderDto, SimpleStatusDto};
 use App\Services\CurlService;
 use Illuminate\Http\Response;
 
@@ -75,6 +75,13 @@ class KapitalBankRepository implements IPaymentRepository
         if(is_null($order)) {
             throw new \Exception('Get Order Simple Status Prosesi zamanı xəta baş verdi', $apiResponse->httpCode);
         }
+
+        $order = new OrderDto(
+            id: $order->id,
+            hppUrl: $order->hpp_url,
+            password: $order->password,
+            status: $order->status,
+        );
 
         return new SimpleStatusDto(
             httpCode: $apiResponse->httpCode,

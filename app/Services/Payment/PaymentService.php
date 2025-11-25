@@ -68,12 +68,11 @@ class PaymentService
     /**
      * @param int $orderId
      * @param int $userId
-     * @return void
+     * @return bool
      * @throws \Exception
      */
-    public function getStatusByOrderId(int $orderId, int $userId): void
+    public function getStatusByOrderId(int $orderId, int $userId): bool
     {
-        $coursesIds = '';
         $simpleStatus = $this->orderPaymentInterface->getSimpleStatusByOrderId($orderId);
         $order = $simpleStatus?->order;
 
@@ -87,6 +86,9 @@ class PaymentService
             $coursesIds = explode(',', $paymentCourseTransaction->course_id);
             $this->soldCourseRepository->activeStatusByUserId($userId, $coursesIds);
             $this->courseTransactionRepository->activateByOrderId($orderId);
+            return true;
         }
+
+        return false;
     }
 }
