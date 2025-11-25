@@ -39,6 +39,6 @@ class SoldCourse extends Model
      */
     public function euser(): HasOne
     {
-        return $this->hasOne(Euser::class,'id','course_id');
+        return $this->hasOne(Euser::class,'id','euser_id');
     }
 }

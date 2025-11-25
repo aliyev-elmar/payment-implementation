@@ -3,26 +3,26 @@
 namespace App\Services\Payment;
 
 use App\Enums\Payment\OrderStatus;
+use App\Services\{BasketService, CourseService};
 use App\Repositories\Payment\{IPaymentRepository, CourseTransactionRepository};
-use App\Repositories\{BasketRepository, SoldCourseRepository};
-use App\Services\CourseService;
+use App\Repositories\SoldCourseRepository;
 use Illuminate\Http\Response;
 
 class PaymentService
 {
     /**
      * @param CourseService $courseService
-     * @param IOrderPayment $orderPaymentInterface
+     * @param BasketService $basketService
+     * @param IOrderPayment $orderPaymentService
      * @param IPaymentRepository $paymentRepository
-     * @param BasketRepository $basketRepository
      * @param CourseTransactionRepository $courseTransactionRepository
      * @param SoldCourseRepository $soldCourseRepository
      */
     public function __construct(
         private readonly CourseService        $courseService,
-        private readonly IOrderPayment        $orderPaymentInterface,
+        private readonly BasketService        $basketService,
+        private readonly IOrderPayment        $orderPaymentService,
         private readonly IPaymentRepository   $paymentRepository,
-        private readonly BasketRepository     $basketRepository,
         private readonly CourseTransactionRepository $courseTransactionRepository,
         private readonly SoldCourseRepository $soldCourseRepository,
     )
@@ -45,7 +45,7 @@ class PaymentService
         $courses = $this->soldCourseRepository->bulkInsert($userId, $coursesIds, 0);
         $amount = $this->soldCourseRepository->getAmountByCourses($courses);
 
-        $response = $this->orderPaymentInterface->sendRequest(
+        $response = $this->orderPaymentService->sendRequest(
             $this->paymentRepository->getTypeRid(),
             $amount,
             $description,
@@ -63,8 +63,8 @@ class PaymentService
             $this->paymentRepository->getLanguage(),
         );
 
-        $this->basketRepository->deleteByUserId($userId);
-        return $this->orderPaymentInterface->getFormUrlByOrder($order);
+        $this->basketService->deleteByUserId($userId);
+        return $this->orderPaymentService->getFormUrlByOrder($order);
     }
 
     /**
@@ -75,22 +75,21 @@ class PaymentService
      */
     public function getStatusByOrderId(int $orderId, int $userId): bool
     {
-        $simpleStatus = $this->orderPaymentInterface->getSimpleStatusByOrderId($orderId);
+        $transaction = $this->courseTransactionRepository->getByOrderId($orderId);
+        $simpleStatus = $this->orderPaymentService->getSimpleStatusByOrderId($orderId);
         $order = $simpleStatus->order;
 
-        $transaction = $this->courseTransactionRepository->getByOrderId($orderId);
+        if ($order->status !== OrderStatus::FULLY_PAID->value) {
+            return false;
+        }
 
         if(is_null($transaction)) {
             throw new \Exception('Payment Course Transaction not found', Response::HTTP_NOT_FOUND);
         }
 
-        if ($order->status === OrderStatus::FULLY_PAID->value) {
-            $coursesIds = explode(',', $transaction->course_id);
-            $this->soldCourseRepository->activeStatusByUserId($userId, $coursesIds);
-            $this->courseTransactionRepository->activateByOrderId($orderId);
-            return true;
-        }
-
-        return false;
+        $coursesIds = explode(',', $transaction->course_id);
+        $this->soldCourseRepository->activeStatusByUserId($userId, $coursesIds);
+        $this->courseTransactionRepository->activateByOrderId($orderId);
+        return true;
     }
 }
