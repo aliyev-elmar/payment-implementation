@@ -2,6 +2,7 @@
 
 namespace App\Services\Payment;
 
+use App\Enums\Payment\OrderStatus;
 use App\Repositories\Payment\{IPaymentRepository, CourseTransactionRepository};
 use App\Repositories\{BasketRepository, SoldCourseRepository};
 use App\Services\CourseService;
@@ -83,7 +84,7 @@ class PaymentService
             throw new \Exception('Payment Course Transaction not found', Response::HTTP_NOT_FOUND);
         }
 
-        if ($order->status === 'FullyPaid') {
+        if ($order->status === OrderStatus::FULLY_PAID->value) {
             $coursesIds = explode(',', $transaction->course_id);
             $this->soldCourseRepository->activeStatusByUserId($userId, $coursesIds);
             $this->courseTransactionRepository->activateByOrderId($orderId);

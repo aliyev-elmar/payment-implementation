@@ -117,11 +117,11 @@ class KapitalBankRepository implements IPaymentRepository
     }
 
     /**
-     * @return int
+     * @return string
      */
-    public function getCurrency(): int
+    public function getCurrency(): string
     {
-        return 944;
+        return '944';
     }
 
     public function getLanguage(): string

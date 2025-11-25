@@ -34,9 +34,9 @@ interface IPaymentRepository
     public function getHppRedirectUrl(): string;
 
     /**
-     * @return int
+     * @return string
      */
-    public function getCurrency(): int;
+    public function getCurrency(): string;
 
     /**
      * @return string
