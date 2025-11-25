@@ -32,7 +32,7 @@ class PaymentController extends Controller
             return response()->json(['formUrl' => $formUrl]);
         } catch (\Throwable $e) {
             DB::rollBack();
-            throw new $e;
+            throw $e;
         }
     }
 
