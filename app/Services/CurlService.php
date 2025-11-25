@@ -2,7 +2,7 @@
 
 namespace App\Services;
 
-use App\DTOs\CurlResponseDto;
+use App\DataTransferObjects\CurlResponseDto;
 
 trait CurlService
 {

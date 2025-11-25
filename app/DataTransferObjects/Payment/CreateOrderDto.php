@@ -1,10 +1,8 @@
 <?php
 
-namespace App\DTOs\Payment;
+namespace App\DataTransferObjects\Payment;
 
-use App\DTOs\Dto;
-
-class SimpleStatusDto extends Dto
+class CreateOrderDto
 {
     /**
      * @param int $httpCode
@@ -13,6 +11,7 @@ class SimpleStatusDto extends Dto
     public function __construct(
         public int $httpCode,
         public ?object $order = null,
-    ){
+    )
+    {
     }
 }

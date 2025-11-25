@@ -1,6 +1,6 @@
 <?php
 
-namespace App\DTOs\Payment;
+namespace App\DataTransferObjects\Payment;
 
 class DetailedStatusDto
 {

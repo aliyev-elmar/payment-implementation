@@ -1,6 +1,6 @@
 <?php
 
-namespace App\DTOs;
+namespace App\DataTransferObjects;
 
 class CurlResponseDto extends Dto
 {
