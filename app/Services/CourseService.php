@@ -2,10 +2,10 @@
 
 namespace App\Services;
 
-use App\Enums\Course\TypeEnum;
+use App\Enums\Corporate\User\{TypeEnum, DutyEnum};
+use App\Exceptions\Payment\PaymentIsRequiredException;
 use App\Repositories\CourseRepository;
 use Illuminate\Http\Response;
-use App\Exceptions\Payment\PaymentIsRequiredException;
 
 class CourseService
 {
@@ -44,7 +44,10 @@ class CourseService
     {
         $access = $this->courseRepository->getAccessesByUserId($userId, $courseId);
 
-        // Check b2c access
+        if($access->duty_id === DutyEnum::ADMIN) {
+            return true;
+        }
+
         if(
             !$access->is_mine &&
             $access->is_corporative === 0 &&
@@ -53,7 +56,6 @@ class CourseService
         ) {
             throw new PaymentIsRequiredException('You must purchase the course to view it');
         }
-
 
         if(
             $access->corp_course_type === TypeEnum::forUsers &&
@@ -69,15 +71,6 @@ class CourseService
             throw new \Exception("You must be in the $access->company_name group users list to view the course.", Response::HTTP_FORBIDDEN);
         }
 
-
-        if($access->is_corporative !== 0 and $access->b2b_b2c === 0) {
-            return $checkB2bAccess;
-        }
-
-        /* Course both b2c but also if it is b2b type */
-        if($checkB2cAccess['status'] === 0 and $checkB2bAccess['status'] === 0) {
-            return $checkB2cAccess;
-        }
         return true;
     }
 }

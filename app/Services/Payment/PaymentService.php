@@ -74,7 +74,7 @@ class PaymentService
     public function getStatusByOrderId(int $orderId, int $userId): bool
     {
         $simpleStatus = $this->orderPaymentInterface->getSimpleStatusByOrderId($orderId);
-        $order = $simpleStatus?->order;
+        $order = $simpleStatus->order;
 
         $paymentCourseTransaction = $this->courseTransactionRepository->getByOrderId($orderId);
 
