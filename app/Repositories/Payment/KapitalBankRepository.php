@@ -116,9 +116,12 @@ class KapitalBankRepository implements IPaymentRepository
         return config("{$this->confFile}.prod_hpp_redirect_url");
     }
 
+    /**
+     * @return int
+     */
     public function getCurrency(): int
     {
-        return '944';
+        return 944;
     }
 
     public function getLanguage(): string
