@@ -111,7 +111,7 @@ class CreateOrderService implements IOrderPayment
         $logText .= "Curl Error : {$apiResponse->curlError}, ";
         $logText .= "Curl Errno : {$apiResponse->curlErrno}, ";
         $logText .= "hppUrl : {$order?->hppUrl}, ";
-        $logText .= "password : {$order?->password}, ";
+//        $logText .= "password : {$order?->password}, ";
         $logText .= "status : {$order?->status}, ";
         $logText .= "cvv2AuthStatus : {$order?->cvv2AuthStatus}, ";
         $logText .= "secret : {$order?->secret}, ";
