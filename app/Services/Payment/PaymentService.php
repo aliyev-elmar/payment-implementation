@@ -41,7 +41,8 @@ class PaymentService
             throw new \Exception('Course already exists in my learning section', Response::HTTP_BAD_REQUEST);
         };
 
-        $amount = $this->soldCourseRepository->getAmountByCourses($userId, $coursesIds, 0);
+        $courses = $this->soldCourseRepository->bulkInsert($userId, $coursesIds, 0);
+        $amount = $this->soldCourseRepository->getAmountByCourses($courses);
 
         $response = $this->orderPaymentInterface->sendRequest(
             $this->paymentRepository->getTypeRid(),

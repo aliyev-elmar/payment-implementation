@@ -17,16 +17,14 @@ class  SoldCourseRepository
      * @param int $userId
      * @param array $coursesIds
      * @param int $status
-     * @return int
+     * @return \Illuminate\Database\Eloquent\Collection
      */
-    public function getAmountByCourses(int $userId, array $coursesIds, int $status): int
+    public function bulkInsert(int $userId, array $coursesIds, int $status): \Illuminate\Database\Eloquent\Collection
     {
-        $amount = 0;
         $courses = $this->courseRepository->get(1, 1, $coursesIds);
 
         $insert = [];
         foreach ($courses as $course) {
-            $amount += $course->price;
             $price = $course->price * 100;
 
             $insert[] = [
@@ -43,6 +41,20 @@ class  SoldCourseRepository
         }
 
         SoldCourse::query()->insert($insert);
+        return $courses;
+    }
+
+    /**
+     * @param \Illuminate\Database\Eloquent\Collection $courses
+     * @return int
+     */
+    public function getAmountByCourses(\Illuminate\Database\Eloquent\Collection $courses): int
+    {
+        $amount = 0;
+        foreach ($courses as $course) {
+            $amount += $course->price;
+        }
+
         return $amount;
     }
 
