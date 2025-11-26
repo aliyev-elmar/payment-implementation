@@ -7,14 +7,14 @@ use App\Contracts\ILogger;
 class LogService implements ILogger
 {
     /**
-     * @param string $logFolder
+     * @param string $folder
      * @param string $text
      * @param int $mkDirPermission
      * @return void
      */
-    public function log(string $logFolder, string $text, int $mkDirPermission = 0777): void
+    public function log(string $folder, string $text, int $mkDirPermission = 0777): void
     {
-        $folderPath = storage_path("logs/$logFolder");
+        $folderPath = storage_path("logs/$folder");
 
         if (!is_dir($folderPath)) {
             mkdir($folderPath, $mkDirPermission, true);
