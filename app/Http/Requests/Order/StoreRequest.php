@@ -1,15 +1,13 @@
 <?php
 
-namespace App\Http\Requests\Student\Payment;
+namespace App\Http\Requests\Order;
 
 use Illuminate\Foundation\Http\FormRequest;
 
-class BuyCourseRequest extends FormRequest
+class StoreRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
-     *
-     * @return bool
      */
     public function authorize(): bool
     {
@@ -19,13 +17,13 @@ class BuyCourseRequest extends FormRequest
     /**
      * Get the validation rules that apply to the request.
      *
-     * @return array
+     * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array<mixed>|string>
      */
     public function rules(): array
     {
         return [
-            'courses_ids' => 'required|array',
-            'courses_ids.*' => 'integer|exists:courses,id',
+            'amount' => 'required|integer|min:100',
+            'description' => 'nullable|string|max:255',
         ];
     }
 }

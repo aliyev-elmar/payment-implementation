@@ -2,63 +2,94 @@
 
 namespace App\Services\Payment\KapitalBank;
 
-use App\DataTransferObjects\CurlResponseDto;
-use App\DataTransferObjects\Payment\{CreateOrderDto, SimpleStatusDto};
-use App\Services\CurlService;
-use App\Services\Payment\IOrderPayment;
-use App\Repositories\Payment\KapitalBankRepository;
-use App\Traits\LogTrait;
+use App\Enums\Payment\OrderStatus;
+use App\Contracts\{ICreateOrderService, ILogService, IPaymentRepository};
+use App\DataTransferObjects\Payment\Order\{CreateDto, OrderDto, SimpleStatusDto};
 use App\Exceptions\Payment\CreateOrderException;
+use App\Services\CurlService;
 
-class CreateOrderService implements IOrderPayment
+class CreateOrderService implements ICreateOrderService
 {
-
-    use LogTrait;
-
     /**
      * @param CurlService $curlService
-     * @param KapitalBankRepository $kapitalBankRepository
+     * @param ILogService $logService
+     * @param IPaymentRepository $paymentRepository
      */
     public function __construct(
         private readonly CurlService $curlService,
-        private readonly KapitalBankRepository $kapitalBankRepository,
+        private readonly ILogService $logService,
+        private readonly IPaymentRepository $paymentRepository,
     )
     {
     }
 
     /**
-     * Send Request To Create Order By typeRid
-     *
-     * @param string $typeRid
      * @param float $amount
      * @param string $description
-     * @param string $hppRedirectUrl
-     * @param string $logPath
-     * @return CreateOrderDto
+     * @return CreateDto
+     * @throws CreateOrderException
      */
-    public function sendRequest(string $typeRid, float $amount, string $description, string  $hppRedirectUrl, string $logPath): CreateOrderDto
+    public function create(float $amount, string $description): CreateDto
     {
+        $typeRid = $this->paymentRepository->getTypeRid();
+
+        $body = json_encode([
+            'order' => [
+                'typeRid' => $typeRid,
+                'amount' => $amount,
+                'currency' => $this->paymentRepository->getCurrency(),
+                'language' => $this->paymentRepository->getLanguage(),
+                'description' => $description,
+                'hppRedirectUrl' => $this->paymentRepository->getHppRedirectUrl(),
+                'hppCofCapturePurposes' => $this->paymentRepository->getHppCofCapturePurposes(),
+            ]
+        ]);
+
         $apiResponse = $this->curlService->postRequest(
-            $this->kapitalBankRepository->apiUrl,
-            $this->makeRequestBody($typeRid, $amount, $description, $hppRedirectUrl),
-            $this->kapitalBankRepository->getRequestHeader()
+            $this->paymentRepository->apiUrl,
+            $body,
+            $this->paymentRepository->getRequestHeader(),
         );
 
-        $this->logRequest($apiResponse, $logPath);
+        $response = $apiResponse->response;
+        $order = $response?->order;
 
-        $order = $apiResponse->response?->order;
-        if(is_null($order)) throw new CreateOrderException($typeRid, $apiResponse->httpCode);
+        $logPath = $this->paymentRepository->getLogPath('Purchase');
 
-        return new CreateOrderDto($apiResponse->httpCode, $order);
+        $logText  = "OrderId : {$order?->id}, ";
+        $logText .= "httpCode : {$apiResponse->httpCode}, ";
+        $logText .= "Curl Error : {$apiResponse->curlError}, ";
+        $logText .= "Curl Errno : {$apiResponse->curlErrno}, ";
+        $logText .= "hppUrl : {$order?->hppUrl}, ";
+        $logText .= "status : {$order?->status}, ";
+        $logText .= "cvv2AuthStatus : {$order?->cvv2AuthStatus}, ";
+        $this->logService->log($logPath, $logText);
+
+        if(is_null($order)) throw new CreateOrderException($typeRid, $response->httpCode);
+
+        return new CreateDto($response->httpCode, $order);
+    }
+
+    /**
+     * @param int $orderId
+     * @return bool
+     * @throws \Exception
+     */
+    public function checkStatusById(int $orderId): bool
+    {
+        $simpleStatus = $this->paymentRepository->getSimpleStatusByOrderId($orderId);
+        $order = $simpleStatus->order;
+
+        return $order->status === OrderStatus::FULLY_PAID->value;
     }
 
     /**
      * Get Form Url By Order Object
      *
-     * @param object $order
+     * @param OrderDto $order
      * @return string
      */
-    public function getFormUrlByOrder(object $order): string
+    public function getFormUrlByOrder(OrderDto $order): string
     {
         return "{$order->hppUrl}?id={$order->id}&password={$order->password}";
     }
@@ -70,52 +101,6 @@ class CreateOrderService implements IOrderPayment
      */
     public function getSimpleStatusByOrderId(int $orderId): SimpleStatusDto
     {
-        return $this->kapitalBankRepository->getSimpleStatusByOrderId($orderId);
-    }
-
-    /**
-     * @param string $typeRid
-     * @param float $amount
-     * @param string $description
-     * @param string $hppRedirectUrl
-     * @return string
-     */
-    private function makeRequestBody(string $typeRid, float $amount,  string $description, string $hppRedirectUrl): string
-    {
-        $body = [
-            'order' => [
-                'typeRid' => $typeRid,
-                'amount' => $amount,
-                'currency' => $this->kapitalBankRepository->currency,
-                'language' => $this->kapitalBankRepository->language,
-                'description' => $description,
-                'hppRedirectUrl' => $hppRedirectUrl,
-                'hppCofCapturePurposes' => $this->kapitalBankRepository->hppCofCapturePurposes
-            ]
-        ];
-
-        return json_encode($body);
-    }
-
-    /**
-     * @param CurlResponseDto $apiResponse
-     * @param string $logPath
-     * @return void
-     */
-    private function logRequest(CurlResponseDto $apiResponse, string $logPath): void
-    {
-        $order = $apiResponse->response?->order;
-
-        $logText  = "OrderId : {$order?->id}, ";
-        $logText .= "httpCode : {$apiResponse->httpCode}, ";
-        $logText .= "Curl Error : {$apiResponse->curlError}, ";
-        $logText .= "Curl Errno : {$apiResponse->curlErrno}, ";
-        $logText .= "hppUrl : {$order?->hppUrl}, ";
-//        $logText .= "password : {$order?->password}, ";
-        $logText .= "status : {$order?->status}, ";
-        $logText .= "cvv2AuthStatus : {$order?->cvv2AuthStatus}, ";
-        $logText .= "secret : {$order?->secret}, ";
-
-        $this->writeLogs($logPath, $logText);
+        return $this->paymentRepository->getSimpleStatusByOrderId($orderId);
     }
 }

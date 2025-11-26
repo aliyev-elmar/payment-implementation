@@ -2,7 +2,8 @@
 
 namespace App\Repositories\Payment;
 
-use App\DataTransferObjects\Payment\{DetailedStatusDto, OrderDto, SimpleStatusDto};
+use App\Contracts\IPaymentRepository;
+use App\DataTransferObjects\Payment\Order\{DetailedStatusDto, OrderDto, SimpleStatusDto};
 use App\Services\CurlService;
 use Illuminate\Http\Response;
 
@@ -21,21 +22,6 @@ class KapitalBankRepository implements IPaymentRepository
     /**
      * @var string
      */
-    public string $currency = 'AZN';
-
-    /**
-     * @var string
-     */
-    public string $language = 'az';
-
-    /**
-     * @var array
-     */
-    public array $hppCofCapturePurposes = ['Cit'];
-
-    /**
-     * @var string
-     */
     private string $confFile = 'payment_systems.kapitalbank';
 
     /**
@@ -43,7 +29,7 @@ class KapitalBankRepository implements IPaymentRepository
      */
     public function __construct(private readonly CurlService $curlService)
     {
-        $this->apiUrl = config("{$this->confFile}.prod_api");
+        $this->apiUrl = config("{$this->confFile}.test_api");
     }
 
     /**
@@ -51,7 +37,7 @@ class KapitalBankRepository implements IPaymentRepository
      */
     public function getRequestHeader(): array
     {
-        $authorization = config("{$this->confFile}.prod_user") . ':' . config("{$this->confFile}.prod_pass");
+        $authorization = config("{$this->confFile}.test_user") . ':' . config("{$this->confFile}.test_pass");
         $token = base64_encode($authorization);
 
         return [
@@ -81,6 +67,8 @@ class KapitalBankRepository implements IPaymentRepository
             hppUrl: $order->hpp_url,
             password: $order->password,
             status: $order->status,
+            cvv2AuthStatus: $order->cvv2AuthStatus,
+            secret: $order->secret,
         );
 
         return new SimpleStatusDto(
@@ -113,7 +101,7 @@ class KapitalBankRepository implements IPaymentRepository
      */
     public function getHppRedirectUrl(): string
     {
-        return config("{$this->confFile}.prod_hpp_redirect_url");
+        return config("{$this->confFile}.test_hpp_redirect_url");
     }
 
     /**
@@ -135,6 +123,14 @@ class KapitalBankRepository implements IPaymentRepository
      */
     public function getLogPath(string $subFolderPath): string
     {
-        return 'Payment/KapitalBank/';
+        return "Payment/KapitalBank/{$subFolderPath}";
+    }
+
+    /**
+     * @return array
+     */
+    public function getHppCofCapturePurposes(): array
+    {
+        return ['Cit'];
     }
 }

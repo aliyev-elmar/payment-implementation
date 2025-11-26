@@ -1,6 +1,6 @@
 <?php
 
-namespace App\DataTransferObjects\Payment;
+namespace App\DataTransferObjects\Payment\Order;
 
 use App\DataTransferObjects\Dto;
 

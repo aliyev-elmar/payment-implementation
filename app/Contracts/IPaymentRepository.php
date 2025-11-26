@@ -1,8 +1,8 @@
 <?php
 
-namespace App\Repositories\Payment;
+namespace App\Contracts;
 
-use App\DataTransferObjects\Payment\{SimpleStatusDto, DetailedStatusDto};
+use App\DataTransferObjects\Payment\Order\{DetailedStatusDto, SimpleStatusDto};
 
 interface IPaymentRepository
 {
@@ -48,4 +48,9 @@ interface IPaymentRepository
      * @return string
      */
     public function getLogPath(string $subFolderPath): string;
+
+    /**
+     * @return array
+     */
+    public function getHppCofCapturePurposes(): array;
 }

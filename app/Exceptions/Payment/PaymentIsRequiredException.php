@@ -13,5 +13,4 @@ class PaymentIsRequiredException  extends RuntimeException
     {
         parent::__construct($message);
     }
-
 }

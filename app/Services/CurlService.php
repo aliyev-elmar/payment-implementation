@@ -4,7 +4,7 @@ namespace App\Services;
 
 use App\DataTransferObjects\CurlResponseDto;
 
-trait CurlService
+class CurlService
 {
 
     /**
@@ -22,6 +22,9 @@ trait CurlService
         curl_setopt($ch, CURLOPT_POST, 1);
         curl_setopt($ch, CURLOPT_HTTPHEADER, $header);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, true);
+        curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 2);
+        curl_setopt($ch, CURLOPT_TIMEOUT, 30);
         $apiResponse = $this->getResponseByCh($ch);
         curl_close($ch);
 
@@ -40,6 +43,9 @@ trait CurlService
         $ch = curl_init($curlUrl);
         curl_setopt($ch, CURLOPT_HTTPHEADER, $header);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, true);
+        curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 2);
+        curl_setopt($ch, CURLOPT_TIMEOUT, 30);
         $apiResponse = $this->getResponseByCh($ch);
         curl_close($ch);
 

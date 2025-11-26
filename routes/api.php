@@ -1,6 +1,6 @@
 <?php
 
-use App\Http\Controllers\Student\PaymentController;
+use App\Http\Controllers\OrderController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -8,7 +8,5 @@ Route::get('/user', function (Request $request) {
     return $request->user();
 })->middleware('auth:sanctum');
 
-Route::group(['middleware' => ['auth:sanctum', 'jwt_secure']], function () {
-    Route::post('/buy-course', [PaymentController::class, 'buyCourse']);
-    Route::get('/check/{id}/order', [PaymentController::class, 'checkOrderStatus']);
-});
+Route::post('/orders', [OrderController::class, 'store'])->middleware('throttle:10,1');
+Route::get('/orders/{order}/status', [OrderController::class, 'getStatusById'])->middleware('throttle:30,1');

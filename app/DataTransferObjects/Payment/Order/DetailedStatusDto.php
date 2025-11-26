@@ -1,8 +1,10 @@
 <?php
 
-namespace App\DataTransferObjects\Payment;
+namespace App\DataTransferObjects\Payment\Order;
 
-class DetailedStatusDto
+use App\DataTransferObjects\Dto;
+
+class DetailedStatusDto extends Dto
 {
     /**
      * @param int $httpCode
