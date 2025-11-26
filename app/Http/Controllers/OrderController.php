@@ -44,12 +44,9 @@ class OrderController extends Controller
         try {
             $isPaid = $this->createOrderService->checkSimpleStatusById($orderId);
 
-            return response()->json([
-                'status' => $isPaid ? 'FullyPaid' : 'payment doesn\'t completed',
-                'message' => $isPaid ? 'Payment completed successfully' : 'Payment is pending'
-            ]);
+            return response()->json(['message' => $isPaid ? 'Payment completed successfully' : 'Payment is pending']);
         } catch (GetOrderStatusException $exception) {
-            return response()->json(['message' => $exception->getMessage()], $exception->status);
+            return response()->json(['message' => $exception->getMessage()], $exception->statusCode);
         }
     }
 }
