@@ -12,6 +12,13 @@ interface IPaymentRepository
     public function getRequestHeader(): array;
 
     /**
+     * @param int $amount
+     * @param string $description
+     * @return array
+     */
+    public function getCreateOrderRequestBody(int $amount, string $description): array;
+
+    /**
      * @param int $orderId
      * @return SimpleStatusDto
      */
@@ -24,33 +31,8 @@ interface IPaymentRepository
     public function getDetailedStatusByOrderId(int $orderId): DetailedStatusDto;
 
     /**
-     * @return string
-     */
-    public function getTypeRid(): string;
-
-    /**
-     * @return string
-     */
-    public function getHppRedirectUrl(): string;
-
-    /**
-     * @return string
-     */
-    public function getCurrency(): string;
-
-    /**
-     * @return string
-     */
-    public function getLanguage(): string;
-
-    /**
      * @param string $subFolderPath
      * @return string
      */
     public function getLogPath(string $subFolderPath): string;
-
-    /**
-     * @return array
-     */
-    public function getHppCofCapturePurposes(): array;
 }

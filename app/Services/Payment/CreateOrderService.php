@@ -1,13 +1,12 @@
 <?php
 
-namespace App\Services\Payment\KapitalBank;
+namespace App\Services\Payment;
 
 use App\Enums\Payment\OrderStatus;
-use App\Exceptions\Payment\GetOrderStatusException;
-use App\Contracts\{ICreateOrderService, ILogService, IPaymentRepository};
 use App\DataTransferObjects\Payment\Order\{CreateDto, OrderDto};
-use App\Exceptions\Payment\CreateOrderException;
+use App\Contracts\{ICreateOrderService, ILogService, IPaymentRepository};
 use App\Services\CurlService;
+use App\Exceptions\Payment\{CreateOrderException, GetOrderStatusException};
 
 class CreateOrderService implements ICreateOrderService
 {
@@ -32,19 +31,8 @@ class CreateOrderService implements ICreateOrderService
      */
     public function create(float $amount, string $description): CreateDto
     {
-        $typeRid = $this->paymentRepository->getTypeRid();
-
-        $body = json_encode([
-            'order' => [
-                'typeRid' => $typeRid,
-                'amount' => $amount,
-                'currency' => $this->paymentRepository->getCurrency(),
-                'language' => $this->paymentRepository->getLanguage(),
-                'description' => $description,
-                'hppRedirectUrl' => $this->paymentRepository->getHppRedirectUrl(),
-                'hppCofCapturePurposes' => $this->paymentRepository->getHppCofCapturePurposes(),
-            ]
-        ]);
+        $body = $this->paymentRepository->getCreateOrderRequestBody($amount, $description);
+        $body = json_encode($body);
 
         $apiResponse = $this->curlService->postRequest(
             $this->paymentRepository->apiUrl,
@@ -66,7 +54,7 @@ class CreateOrderService implements ICreateOrderService
         $logText .= "cvv2AuthStatus : {$order?->cvv2AuthStatus}, ";
         $this->logService->log($logPath, $logText);
 
-        if(is_null($order)) throw new CreateOrderException($typeRid, $response->httpCode);
+        if(is_null($order)) throw new CreateOrderException($response->httpCode);
 
         return new CreateDto($response->httpCode, $order);
     }

@@ -3,9 +3,9 @@
 namespace App\Providers;
 
 use App\Contracts\{ICreateOrderService, ILogService, IPaymentRepository};
-use App\Services\LogService;
-use App\Services\Payment\KapitalBank\CreateOrderService;
 use App\Repositories\Payment\KapitalBankRepository;
+use App\Services\LogService;
+use App\Services\Payment\CreateOrderService;
 use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider

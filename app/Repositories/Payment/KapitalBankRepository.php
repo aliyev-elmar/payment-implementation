@@ -49,6 +49,26 @@ class KapitalBankRepository implements IPaymentRepository
     }
 
     /**
+     * @param int $amount
+     * @param string $description
+     * @return array
+     */
+    public function getCreateOrderRequestBody(int $amount, string $description): array
+    {
+        return [
+            'order' => [
+                'typeRid' => config("{$this->confFile}.order.typeRid.Purchase"),
+                'amount' => $amount,
+                'currency' => '944',
+                'language' => 'AZ',
+                'description' => $description,
+                'hppRedirectUrl' => config("{$this->confFile}.test_hpp_redirect_url"),
+                'hppCofCapturePurposes' => ['Cit'],
+            ]
+        ];
+    }
+
+    /**
      * @param int $orderId
      * @return SimpleStatusDto
      * @throws GetOrderStatusException
@@ -90,48 +110,11 @@ class KapitalBankRepository implements IPaymentRepository
     }
 
     /**
-     * @return string
-     */
-    public function getTypeRid(): string
-    {
-        return config("{$this->confFile}.order.typeRid.Purchase");
-    }
-
-    /**
-     * @return string
-     */
-    public function getHppRedirectUrl(): string
-    {
-        return config("{$this->confFile}.test_hpp_redirect_url");
-    }
-
-    /**
-     * @return string
-     */
-    public function getCurrency(): string
-    {
-        return '944';
-    }
-
-    public function getLanguage(): string
-    {
-        return 'AZ';
-    }
-
-    /**
      * @param string $subFolderPath
      * @return string
      */
     public function getLogPath(string $subFolderPath): string
     {
         return "Payment/KapitalBank/{$subFolderPath}";
-    }
-
-    /**
-     * @return array
-     */
-    public function getHppCofCapturePurposes(): array
-    {
-        return ['Cit'];
     }
 }

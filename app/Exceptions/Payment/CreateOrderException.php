@@ -12,13 +12,13 @@ class CreateOrderException  extends RuntimeException
     public int $statusCode;
 
     /**
-     * @param string $typeRid
      * @param int $statusCode
+     * @param string $message
      */
-    public function __construct(string $typeRid, int $statusCode)
+    public function __construct(int $statusCode, string $message = 'Create Order Prosesi zamanı xəta baş verdi')
     {
         $this->statusCode = $statusCode;
-        parent::__construct("Create Order ($typeRid) Prosesi zamanı xəta baş verdi");
+        parent::__construct($message);
     }
 
 }
