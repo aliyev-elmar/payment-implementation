@@ -2,7 +2,7 @@
 
 namespace App\Contracts;
 
-interface ILogService
+interface ILogger
 {
     /**
      * @param string $logFolder

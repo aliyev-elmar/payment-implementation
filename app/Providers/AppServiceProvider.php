@@ -2,10 +2,6 @@
 
 namespace App\Providers;
 
-use App\Contracts\{ICreateOrderService, ILogService, IPaymentRepository};
-use App\Repositories\Payment\KapitalBankRepository;
-use App\Services\LogService;
-use App\Services\Payment\CreateOrderService;
 use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
@@ -15,9 +11,20 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        $this->app->bind(ICreateOrderService::class, CreateOrderService::class);
-        $this->app->bind(ILogService::class, LogService::class);
-        $this->app->bind(IPaymentRepository::class, KapitalBankRepository::class);
+        $this->app->bind(
+            \App\Contracts\ICreateOrderService::class,
+            \App\Services\Payment\CreateOrderService::class,
+        );
+
+        $this->app->bind(
+            \App\Contracts\ILogger::class,
+            \App\Services\LogService::class,
+        );
+
+        $this->app->bind(
+            \App\Repositories\Payment\PaymentRepository::class,
+            \App\Repositories\Payment\KapitalBankRepository::class,
+        );
     }
 
     /**

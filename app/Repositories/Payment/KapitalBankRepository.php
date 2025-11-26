@@ -2,13 +2,12 @@
 
 namespace App\Repositories\Payment;
 
-use App\Contracts\IPaymentRepository;
 use App\DataTransferObjects\Payment\Order\{DetailedStatusDto, OrderDto, SimpleStatusDto};
+use App\Exceptions\Payment\GetOrderStatusException;
 use App\Services\CurlService;
 use Illuminate\Http\Response;
-use App\Exceptions\Payment\GetOrderStatusException;
 
-class KapitalBankRepository implements IPaymentRepository
+class KapitalBankRepository extends PaymentRepository
 {
     /**
      * @var string

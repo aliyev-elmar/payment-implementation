@@ -2,9 +2,9 @@
 
 namespace App\Services;
 
-use App\Contracts\ILogService;
+use App\Contracts\ILogger;
 
-class LogService implements ILogService
+class LogService implements ILogger
 {
     /**
      * @param string $logFolder
