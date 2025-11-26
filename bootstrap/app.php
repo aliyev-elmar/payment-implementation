@@ -20,6 +20,10 @@ return Application::configure(basePath: dirname(__DIR__))
             return response()->json(['message' => $exception->getMessage()], $exception->statusCode);
         });
 
+        $exceptions->render(function (\App\Exceptions\Payment\GetOrderStatusException $exception) {
+            return response()->json(['message' => $exception->getMessage()], $exception->statusCode);
+        });
+
         $exceptions->render(function (\App\Exceptions\Payment\PaymentIsRequiredException $exception) {
             return response()->json(['message' => $exception->getMessage()], Response::HTTP_PAYMENT_REQUIRED);
         });

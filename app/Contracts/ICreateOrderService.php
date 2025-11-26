@@ -2,7 +2,8 @@
 
 namespace App\Contracts;
 
-use App\DataTransferObjects\Payment\Order\{CreateDto, OrderDto, SimpleStatusDto};
+use App\Exceptions\Payment\GetOrderStatusException;
+use App\DataTransferObjects\Payment\Order\{CreateDto, OrderDto};
 use App\Exceptions\Payment\CreateOrderException;
 
 interface ICreateOrderService
@@ -18,19 +19,13 @@ interface ICreateOrderService
     /**
      * @param int $orderId
      * @return bool
-     * @throws \Exception
+     * @throws GetOrderStatusException
      */
-    public function checkStatusById(int $orderId): bool;
+    public function checkSimpleStatusById(int $orderId): bool;
 
     /**
      * @param OrderDto $order
      * @return string
      */
     public function getFormUrlByOrder(OrderDto $order): string;
-
-    /**
-     * @param int $orderId
-     * @return SimpleStatusDto
-     */
-    public function getSimpleStatusByOrderId(int $orderId) : SimpleStatusDto;
 }

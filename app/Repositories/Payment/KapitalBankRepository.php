@@ -6,6 +6,7 @@ use App\Contracts\IPaymentRepository;
 use App\DataTransferObjects\Payment\Order\{DetailedStatusDto, OrderDto, SimpleStatusDto};
 use App\Services\CurlService;
 use Illuminate\Http\Response;
+use App\Exceptions\Payment\GetOrderStatusException;
 
 class KapitalBankRepository implements IPaymentRepository
 {
@@ -50,7 +51,7 @@ class KapitalBankRepository implements IPaymentRepository
     /**
      * @param int $orderId
      * @return SimpleStatusDto
-     * @throws \Exception
+     * @throws GetOrderStatusException
      */
     public function getSimpleStatusByOrderId(int $orderId): SimpleStatusDto
     {
@@ -59,7 +60,7 @@ class KapitalBankRepository implements IPaymentRepository
         $order = $apiResponse->response?->order;
 
         if(is_null($order)) {
-            throw new \Exception('Get Order Simple Status Prosesi zamanı xəta baş verdi', $apiResponse->httpCode);
+            throw new GetOrderStatusException($apiResponse->httpCode);
         }
 
         $order = new OrderDto(

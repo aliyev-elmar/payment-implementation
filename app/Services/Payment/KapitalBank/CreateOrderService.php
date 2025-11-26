@@ -3,8 +3,9 @@
 namespace App\Services\Payment\KapitalBank;
 
 use App\Enums\Payment\OrderStatus;
+use App\Exceptions\Payment\GetOrderStatusException;
 use App\Contracts\{ICreateOrderService, ILogService, IPaymentRepository};
-use App\DataTransferObjects\Payment\Order\{CreateDto, OrderDto, SimpleStatusDto};
+use App\DataTransferObjects\Payment\Order\{CreateDto, OrderDto};
 use App\Exceptions\Payment\CreateOrderException;
 use App\Services\CurlService;
 
@@ -73,9 +74,9 @@ class CreateOrderService implements ICreateOrderService
     /**
      * @param int $orderId
      * @return bool
-     * @throws \Exception
+     * @throws GetOrderStatusException
      */
-    public function checkStatusById(int $orderId): bool
+    public function checkSimpleStatusById(int $orderId): bool
     {
         $simpleStatus = $this->paymentRepository->getSimpleStatusByOrderId($orderId);
         $order = $simpleStatus->order;
@@ -92,15 +93,5 @@ class CreateOrderService implements ICreateOrderService
     public function getFormUrlByOrder(OrderDto $order): string
     {
         return "{$order->hppUrl}?id={$order->id}&password={$order->password}";
-    }
-
-    /**
-     * @param int $orderId
-     * @return SimpleStatusDto
-     * @throws \Exception
-     */
-    public function getSimpleStatusByOrderId(int $orderId): SimpleStatusDto
-    {
-        return $this->paymentRepository->getSimpleStatusByOrderId($orderId);
     }
 }

@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Contracts\ICreateOrderService;
 use App\Exceptions\Payment\CreateOrderException;
+use App\Exceptions\Payment\GetOrderStatusException;
 use App\Http\Requests\Order\StoreRequest;
 use Illuminate\Http\{JsonResponse, Response};
 
@@ -19,7 +20,7 @@ class OrderController extends Controller
     /**
      * @param StoreRequest $request
      * @return JsonResponse
-     * @throws \Throwable
+     * @throws CreateOrderException
      */
     public function store(StoreRequest $request): JsonResponse
     {
@@ -36,22 +37,19 @@ class OrderController extends Controller
     /**
      * @param int $orderId
      * @return JsonResponse
+     * @throws GetOrderStatusException
      */
     public function getStatusById(int $orderId): JsonResponse
     {
         try {
-            $isPaid = $this->createOrderService->checkStatusById($orderId);
+            $isPaid = $this->createOrderService->checkSimpleStatusById($orderId);
 
             return response()->json([
-                'status' => $isPaid ? 'paid' : 'pending',
+                'status' => $isPaid ? 'FullyPaid' : 'payment doesn\'t completed',
                 'message' => $isPaid ? 'Payment completed successfully' : 'Payment is pending'
             ]);
-
-        } catch (\Exception $exception) {
-            return response()->json([
-                'message' => 'Error checking payment status',
-                'error' => $exception->getMessage()
-            ], Response::HTTP_INTERNAL_SERVER_ERROR);
+        } catch (GetOrderStatusException $exception) {
+            return response()->json(['message' => $exception->getMessage()], $exception->status);
         }
     }
 }
