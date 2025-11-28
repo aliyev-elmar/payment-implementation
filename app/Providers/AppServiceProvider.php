@@ -17,7 +17,7 @@ class AppServiceProvider extends ServiceProvider
         );
 
         $this->app->bind(
-            \App\Repositories\Payment\PaymentRepository::class,
+            \App\Contracts\IPaymentGateway::class,
             \App\Repositories\Payment\KapitalBankRepository::class,
         );
     }

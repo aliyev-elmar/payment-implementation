@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Enums\Payment;
+namespace App\Enums\Payment\Order;
 
 enum OrderStatus: string
 {

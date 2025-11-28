@@ -2,14 +2,15 @@
 
 namespace App\Repositories\Payment;
 
+use App\Contracts\IPaymentGateway;
+use App\Enums\Payment\Order\OrderTypeRid;
 use App\DataTransferObjects\Payment\Order\{CreateOrderDto, CreateOrderResponseDto};
-use App\DataTransferObjects\Payment\Order\SimpleStatus\{SimpleStatusDto, SimpleStatusType, SimpleStatusResponseDto};
+use App\DataTransferObjects\Payment\Order\SimpleStatus\{SimpleStatusDto, SimpleStatusResponseDto, SimpleStatusType};
 use App\Services\CurlService;
 use Illuminate\Http\Response;
-use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
-use App\Exceptions\Payment\KapitalBankException;
+use App\Exceptions\{PaymentGatewayException, OrderNotFoundException};
 
-class KapitalBankRepository extends PaymentRepository
+class KapitalBankRepository implements IPaymentGateway
 {
     /**
      * @var string
@@ -22,14 +23,14 @@ class KapitalBankRepository extends PaymentRepository
     private readonly string $hppRedirectUrl;
 
     /**
-     * @var array
+     * @var string
      */
-    private readonly array $header;
+    private readonly string $user;
 
     /**
      * @var string
      */
-    private readonly string $token;
+    private readonly string $pass;
 
     /**
      * @var string
@@ -39,58 +40,61 @@ class KapitalBankRepository extends PaymentRepository
     /**
      * @var string
      */
-    private string $confFile = 'payment_systems.kapitalbank.test'; // prod
+    private string $currency = 'AZN';
+
+    /**
+     * @var string
+     */
+    private string $language = 'az';
+
+    /**
+     * @var array
+     */
+    private array $hppCofCapturePurposes = ['Cit'];
+
+    /**
+     * @var string
+     */
+    private string $paymentGateway = 'Kapital Bank';
 
     /**
      * Set API URL && Authorization Basic
      */
-    public function __construct(private readonly CurlService $curlService)
+    public function __construct(
+        private readonly CurlService $curlService,
+        string $apiUrl,
+        string $hppRedirectUrl,
+        string $user,
+        string $pass
+    )
     {
-        // Set Urls
-        $this->apiUrl = config("{$this->confFile}.api");
-        $this->hppRedirectUrl = config("{$this->confFile}.hpp_redirect_url");
-
-        // Set token for authorization
-        $this->token = base64_encode(config("{$this->confFile}.user") . ':' . config("{$this->confFile}.pass"));
-
-        $this->header = [
-            "Accept: {$this->contentType}",
-            "Content-Type: {$this->contentType}",
-            "Authorization: Basic {$this->token}"
-        ];
+        $this->apiUrl = $apiUrl;
+        $this->hppRedirectUrl = $hppRedirectUrl;
+        $this->user = $user;
+        $this->pass = $pass;
     }
 
     /**
      * @param int $amount
      * @param string $description
-     * @param string $currency
-     * @param string $language
-     * @param string $typeRid
-     * @param array $hppCofCapturePurposes
+     * @param OrderTypeRid $orderTypeRid
      * @return CreateOrderResponseDto
-     * @throws NotFoundHttpException
+     * @throws PaymentGatewayException
      */
-    public function createOrder(
-        int $amount,
-        string $description,
-        string $currency = 'AZN',
-        string $language = 'az',
-        string $typeRid = 'Purchase',
-        array $hppCofCapturePurposes = ['Cit'],
-    ): CreateOrderResponseDto
+    public function createOrder(int $amount, string $description, OrderTypeRid $orderTypeRid): CreateOrderResponseDto
     {
         $apiResponse = $this->curlService->postRequest(
             $this->apiUrl,
-            $this->header,
+            $this->getHeader(),
             json_encode([
                 'order' => [
-                    'typeRid' => config("{$this->confFile}.order.typeRid.{$typeRid}"),
+                    'typeRid' => $orderTypeRid->value,
                     'amount' => $amount,
-                    'currency' => $currency,
-                    'language' => $language,
+                    'currency' => $this->currency,
+                    'language' => $this->language,
                     'description' => $description,
                     'hppRedirectUrl' => $this->hppRedirectUrl,
-                    'hppCofCapturePurposes' => $hppCofCapturePurposes,
+                    'hppCofCapturePurposes' => $this->hppCofCapturePurposes,
                 ]
             ]),
         );
@@ -98,7 +102,12 @@ class KapitalBankRepository extends PaymentRepository
         $response = $apiResponse->response;
 
         if($apiResponse->httpCode != Response::HTTP_OK) {
-            throw new KapitalBankException($apiResponse->httpCode, $response?->errorCode, $response?->errorDescription);
+            throw new PaymentGatewayException(
+                $this->paymentGateway,
+                $apiResponse->httpCode,
+                $response?->errorCode,
+                $response?->errorDescription,
+            );
         }
 
         $order = $response?->order;
@@ -116,7 +125,7 @@ class KapitalBankRepository extends PaymentRepository
             order: $order,
             curlError: $apiResponse->curlError,
             curlErrno: $apiResponse->curlErrno,
-            logFolderPath: "Payment/KapitalBank/{$typeRid}",
+            logFolderPath: "Payment/KapitalBank/CreateOrder/{$orderTypeRid->value}",
             formUrl: "{$order->hppUrl}?id={$order->id}&password={$order->password}",
         );
     }
@@ -124,20 +133,26 @@ class KapitalBankRepository extends PaymentRepository
     /**
      * @param int $orderId
      * @return SimpleStatusResponseDto
-     * @throws NotFoundHttpException
+     * @throws PaymentGatewayException
+     * @throws OrderNotFoundException
      */
     public function getSimpleStatusByOrderId(int $orderId): SimpleStatusResponseDto
     {
-        $apiResponse = $this->curlService->getRequest($this->apiUrl . $orderId, $this->header);
+        $apiResponse = $this->curlService->getRequest($this->apiUrl . $orderId, $this->getHeader());
         $response = $apiResponse->response;
-        $order = $response?->order;
 
         if($apiResponse->httpCode != Response::HTTP_OK) {
-            throw new KapitalBankException($apiResponse->httpCode, $response?->errorCode, $response?->errorDescription);
+            throw new PaymentGatewayException(
+                $this->paymentGateway,
+                $apiResponse->httpCode,
+                $response?->errorCode,
+                $response?->errorDescription,
+            );
         }
 
+        $order = $response?->order;
         if(is_null($order)) {
-            throw new NotFoundHttpException('Order not found');
+            throw new OrderNotFoundException($this->paymentGateway);
         }
 
         $simpleStatusType = new SimpleStatusType(
@@ -161,5 +176,19 @@ class KapitalBankRepository extends PaymentRepository
             curlErrno: $apiResponse->curlErrno,
             logFolderPath: "Payment/KapitalBank/GetSimpleStatus",
         );
+    }
+
+    /**
+     * @return array
+     */
+    private function getHeader(): array
+    {
+        $token = base64_encode($this->user . ':' . $this->pass);
+
+        return [
+            "Accept: {$this->contentType}",
+            "Content-Type: {$this->contentType}",
+            "Authorization: Basic {$token}"
+        ];
     }
 }

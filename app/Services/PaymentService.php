@@ -3,30 +3,33 @@
 namespace App\Services;
 
 use App\Contracts\ILogger;
+use App\Enums\Payment\Order\OrderTypeRid;
 use App\DataTransferObjects\Payment\Order\SimpleStatus\SimpleStatusResponseDto;
-use App\Repositories\Payment\PaymentRepository;
 
 class PaymentService
 {
     /**
      * @param ILogger $logService
-     * @param PaymentRepository $paymentRepository
+     * @param PaymentDriverFactory $paymentDriverFactory
      */
     public function __construct(
-        private readonly ILogger           $logService,
-        private readonly PaymentRepository $paymentRepository,
+        private readonly ILogger              $logService,
+        private readonly PaymentDriverFactory $paymentDriverFactory,
     )
     {
     }
 
     /**
-     * @param float $amount
+     * @param string $driver
+     * @param int $amount
      * @param string $description
+     * @param OrderTypeRid $orderTypeRid
      * @return string|null
      */
-    public function createOrder(float $amount, string $description): ?string
+    public function createOrder(string $driver, int $amount, string $description, OrderTypeRid $orderTypeRid): ?string
     {
-        $response = $this->paymentRepository->createOrder($amount, $description);
+        $gateway = $this->paymentDriverFactory->driver($driver);
+        $response = $gateway->createOrder($amount, $description, $orderTypeRid);
         $order = $response->order;
 
         $logText  = "OrderId : {$order?->id}, ";
@@ -43,12 +46,14 @@ class PaymentService
     }
 
     /**
+     * @param string $driver
      * @param int $orderId
      * @return SimpleStatusResponseDto
      */
-    public function getSimpleStatusByOrderId(int $orderId): SimpleStatusResponseDto
+    public function getSimpleStatusByOrderId(string $driver, int $orderId): SimpleStatusResponseDto
     {
-        $response = $this->paymentRepository->getSimpleStatusByOrderId($orderId);
+        $gateway = $this->paymentDriverFactory->driver($driver);
+        $response = $gateway->getSimpleStatusByOrderId($orderId);
         $order = $response->order;
 
         $logText  = "OrderId : {$order?->id}, ";
