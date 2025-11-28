@@ -9,4 +9,4 @@ Route::get('/user', function (Request $request) {
 })->middleware('auth:sanctum');
 
 Route::post('/orders', [OrderController::class, 'store'])->middleware('throttle:10,1');
-Route::get('/orders/{order}/status', [OrderController::class, 'getStatusById'])->middleware('throttle:30,1');
+Route::get('/orders/{order}/simple-status', [OrderController::class, 'getSimpleStatusById'])->middleware('throttle:30,1');

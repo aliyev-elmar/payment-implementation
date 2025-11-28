@@ -4,7 +4,7 @@ namespace App\DataTransferObjects\Payment\Order;
 
 use App\DataTransferObjects\Dto;
 
-class OrderDto extends Dto
+class CreateOrderDto extends Dto
 {
     /**
      * @param string $id

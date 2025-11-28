@@ -11,11 +11,11 @@ class CurlService
      * Post Request With Curl
      *
      * @param string $curlUrl
-     * @param string $body
      * @param array $header
+     * @param string $body
      * @return CurlResponseDto
      */
-    public function postRequest(string $curlUrl, string $body, array $header): CurlResponseDto
+    public function postRequest(string $curlUrl, array $header, string $body): CurlResponseDto
     {
         $ch = curl_init($curlUrl);
         curl_setopt($ch, CURLOPT_POSTFIELDS, $body);

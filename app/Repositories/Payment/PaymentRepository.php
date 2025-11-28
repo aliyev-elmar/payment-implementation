@@ -2,31 +2,32 @@
 
 namespace App\Repositories\Payment;
 
-use App\Contracts\IOrderCreator;
-use App\DataTransferObjects\Payment\Order\{DetailedStatusDto, SimpleStatusDto};
+use App\DataTransferObjects\Payment\Order\CreateOrderResponseDto;
+use App\DataTransferObjects\Payment\Order\SimpleStatus\SimpleStatusResponseDto;
 
-abstract class PaymentRepository implements IOrderCreator
+abstract class PaymentRepository
 {
     /**
-     * @return array
+     * @param int $amount
+     * @param string $description
+     * @param string $currency
+     * @param string $language
+     * @param string $typeRid
+     * @param array $hppCofCapturePurposes
+     * @return CreateOrderResponseDto
      */
-    public abstract function getRequestHeader(): array;
+    public abstract function createOrder(
+        int $amount,
+        string $description,
+        string $currency = 'AZN',
+        string $language = 'az',
+        string $typeRid = 'Purchase',
+        array $hppCofCapturePurposes = ['Cit'],
+    ): CreateOrderResponseDto;
 
     /**
      * @param int $orderId
-     * @return SimpleStatusDto
+     * @return SimpleStatusResponseDto
      */
-    public abstract function getSimpleStatusByOrderId(int $orderId): SimpleStatusDto;
-
-    /**
-     * @param int $orderId
-     * @return DetailedStatusDto
-     */
-    public abstract function getDetailedStatusByOrderId(int $orderId): DetailedStatusDto;
-
-    /**
-     * @param string $subFolderPath
-     * @return string
-     */
-    public abstract function getLogPath(string $subFolderPath): string;
+    public abstract function getSimpleStatusByOrderId(int $orderId): SimpleStatusResponseDto;
 }
