@@ -2,14 +2,14 @@
 
 namespace App\Services\Payment;
 
-use App\Contracts\{ICreateOrderService, ILogger};
-use App\DataTransferObjects\Payment\Order\{CreateDto, OrderDto};
 use App\Enums\Payment\OrderStatus;
-use App\Exceptions\Payment\{CreateOrderException, GetOrderStatusException};
-use App\Repositories\Payment\PaymentRepository;
+use App\Contracts\ILogger;
+use App\DataTransferObjects\Payment\Order\{CreateDto, OrderDto};
 use App\Services\CurlService;
+use App\Repositories\Payment\PaymentRepository;
+use App\Exceptions\Payment\{CreateOrderException, GetOrderStatusException};
 
-class CreateOrderService implements ICreateOrderService
+class CreateOrderService
 {
     /**
      * @param CurlService $curlService

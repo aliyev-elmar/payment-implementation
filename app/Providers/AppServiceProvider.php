@@ -12,11 +12,6 @@ class AppServiceProvider extends ServiceProvider
     public function register(): void
     {
         $this->app->bind(
-            \App\Contracts\ICreateOrderService::class,
-            \App\Services\Payment\CreateOrderService::class,
-        );
-
-        $this->app->bind(
             \App\Contracts\ILogger::class,
             \App\Services\LogService::class,
         );

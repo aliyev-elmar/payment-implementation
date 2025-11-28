@@ -2,18 +2,17 @@
 
 namespace App\Http\Controllers;
 
-use App\Contracts\ICreateOrderService;
-use App\Exceptions\Payment\CreateOrderException;
-use App\Exceptions\Payment\GetOrderStatusException;
 use App\Http\Requests\Order\StoreRequest;
+use App\Services\Payment\CreateOrderService;
 use Illuminate\Http\{JsonResponse, Response};
+use App\Exceptions\Payment\{CreateOrderException, GetOrderStatusException};
 
 class OrderController extends Controller
 {
     /**
-     * @param ICreateOrderService $createOrderService
+     * @param CreateOrderService $createOrderService
      */
-    public function __construct(private readonly ICreateOrderService $createOrderService)
+    public function __construct(private readonly CreateOrderService $createOrderService)
     {
     }
 

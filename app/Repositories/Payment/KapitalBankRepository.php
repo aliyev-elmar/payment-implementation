@@ -74,8 +74,8 @@ class KapitalBankRepository extends PaymentRepository
      */
     public function getSimpleStatusByOrderId(int $orderId): SimpleStatusDto
     {
-        $curlUrl = $this->apiUrl . $orderId;
-        $apiResponse = $this->curlService->getRequest($curlUrl, $this->getRequestHeader());
+        $url = $this->apiUrl . $orderId;
+        $apiResponse = $this->curlService->getRequest($url, $this->getRequestHeader());
         $order = $apiResponse->response?->order;
 
         if(is_null($order)) {
