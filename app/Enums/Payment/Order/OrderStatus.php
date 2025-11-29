@@ -7,4 +7,5 @@ enum OrderStatus: string
     case FULLY_PAID = 'FullyPaid';
     case PREPARING = 'Preparing';
     case EXPIRED = 'Expired';
+    case DECLINED = 'Declined';
 }
