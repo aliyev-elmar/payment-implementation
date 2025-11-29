@@ -55,7 +55,6 @@ class OrderController extends Controller
         try {
             $simpleStatusResponse = $this->paymentService->getSimpleStatusByOrderId($this->paymentDriver, $orderId);
             return response()->json(['order' => $simpleStatusResponse->order], $simpleStatusResponse->httpCode);
-
         } catch (OrderNotFoundException $e) {
             return response()->json(['message' => $e->getMessage()], Response::HTTP_NOT_FOUND);
         } catch (PaymentGatewayException $e) {

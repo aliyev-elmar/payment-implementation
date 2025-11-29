@@ -15,7 +15,6 @@ class PaymentDriverFactory
     /**
      * @param string $driver
      * @return IPaymentGateway
-     * @throws InvalidArgumentException
      */
     public function driver(string $driver): IPaymentGateway
     {
@@ -23,28 +22,27 @@ class PaymentDriverFactory
             return $this->gateways[$driver];
         }
 
-        $gateway = $this->createDriverInstance($driver);
+        $appEnv = app()->environment('production') ? 'prod' : 'test';
+        $gateway = $this->createDriverInstance($driver, $appEnv);
         return $this->gateways[$driver] = $gateway;
     }
 
     /**
      * @param string $driver
+     * @param string $appEnv
      * @return IPaymentGateway
-     * @throws InvalidArgumentException
      */
-    private function createDriverInstance(string $driver): IPaymentGateway
+    private function createDriverInstance(string $driver, string $appEnv): IPaymentGateway
     {
         $repositoryClass = config("payment.map.{$driver}");
+        $config = config("payment.drivers.{$driver}.{$appEnv}");
 
         if (is_null($repositoryClass)) {
             throw new InvalidArgumentException("Unsupported payment driver [{$driver}]. Map not found in configuration.");
         }
 
-        $envKey = app()->environment('production') ? 'prod' : 'test';
-        $config = config("payment.drivers.{$driver}.{$envKey}");
-
         if (is_null($config)) {
-            throw new InvalidArgumentException("Missing configuration for driver [{$driver}] in environment [{$envKey}].");
+            throw new InvalidArgumentException("Missing configuration for driver [{$driver}] in environment [{$appEnv}].");
         }
 
         return app($repositoryClass, [
