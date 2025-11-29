@@ -57,11 +57,7 @@ class PaymentService
      * @param OrderTypeRid $orderTypeRid
      * @return void
      */
-    private function logCreateOrderResponse(
-        string $driver,
-        CreateOrderResponseDto $response,
-        OrderTypeRid $orderTypeRid,
-    ): void
+    private function logCreateOrderResponse(string $driver, CreateOrderResponseDto $response, OrderTypeRid $orderTypeRid): void
     {
         $order = $response->order;
         $logFolder = "Payment/{$driver}/CreateOrder/{$orderTypeRid->value}";
