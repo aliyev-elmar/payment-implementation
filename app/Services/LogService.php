@@ -3,26 +3,34 @@
 namespace App\Services;
 
 use App\Contracts\ILogger;
+use Illuminate\Support\Facades\File;
 
 class LogService implements ILogger
 {
     /**
      * @param string $folder
-     * @param string $text
+     * @param array $context
      * @param int $mkDirPermission
      * @return void
      */
-    public function log(string $folder, string $text, int $mkDirPermission = 0777): void
+    public function log(string $folder, array $context, int $mkDirPermission = 0777): void
     {
         $folderPath = storage_path("logs/$folder");
 
         if (!is_dir($folderPath)) {
-            mkdir($folderPath, $mkDirPermission, true);
+            File::makeDirectory($folderPath, $mkDirPermission, true);
         }
 
         $filePath = $folderPath . '/' . date('Y-m-d') . '.log';
-        $logEntry = date('Y-m-d H:i:s') . " : $text\n";
+        $timestamp = date('Y-m-d H:i:s');
 
-        file_put_contents($filePath, $logEntry, FILE_APPEND | LOCK_EX);
+        $logData = [];
+        foreach ($context as $key => $value) {
+            $logData[] = "{$key} : " . (is_null($value) ? 'null' : (string)$value);
+        }
+
+        $logText = implode(', ', $logData);
+        $logEntry = "{$timestamp} : {$logText}\n";
+        File::append($filePath, $logEntry);
     }
 }

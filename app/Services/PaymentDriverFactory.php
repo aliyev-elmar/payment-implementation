@@ -32,7 +32,7 @@ class PaymentDriverFactory
      * @return IPaymentGateway
      * @throws InvalidArgumentException
      */
-    protected function createDriverInstance(string $driver): IPaymentGateway
+    private function createDriverInstance(string $driver): IPaymentGateway
     {
         $repositoryClass = config("payment.map.{$driver}");
 

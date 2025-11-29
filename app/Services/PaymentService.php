@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Contracts\ILogger;
 use App\Enums\Payment\Order\OrderTypeRid;
+use App\DataTransferObjects\Payment\Order\CreateOrderResponseDto;
 use App\DataTransferObjects\Payment\Order\SimpleStatus\SimpleStatusResponseDto;
 
 class PaymentService
@@ -13,7 +14,7 @@ class PaymentService
      * @param PaymentDriverFactory $paymentDriverFactory
      */
     public function __construct(
-        private readonly ILogger              $logService,
+        private readonly ILogger $logService,
         private readonly PaymentDriverFactory $paymentDriverFactory,
     )
     {
@@ -30,16 +31,7 @@ class PaymentService
     {
         $gateway = $this->paymentDriverFactory->driver($driver);
         $response = $gateway->createOrder($amount, $description, $orderTypeRid);
-        $order = $response->order;
-
-        $logText  = "OrderId : {$order?->id}, ";
-        $logText .= "httpCode : {$response->httpCode}, ";
-        $logText .= "Curl Error : {$response->curlError}, ";
-        $logText .= "Curl Errno : {$response->curlErrno}, ";
-        $logText .= "hppUrl : {$order?->hppUrl}, ";
-        $logText .= "status : {$order?->status}, ";
-        $logText .= "cvv2AuthStatus : {$order?->cvv2AuthStatus}, ";
-        $this->logService->log($response->logFolderPath, $logText);
+        $this->logCreateOrderResponse($driver, $response, $orderTypeRid);
 
         return $response->formUrl;
 
@@ -54,15 +46,57 @@ class PaymentService
     {
         $gateway = $this->paymentDriverFactory->driver($driver);
         $response = $gateway->getSimpleStatusByOrderId($orderId);
-        $order = $response->order;
-
-        $logText  = "OrderId : {$order?->id}, ";
-        $logText .= "httpCode : {$response->httpCode}, ";
-        $logText .= "Curl Error : {$response->curlError}, ";
-        $logText .= "Curl Errno : {$response->curlErrno}, ";
-        $logText .= "status : {$order?->status}, ";
-        $this->logService->log($response->logFolderPath, $logText);
+        $this->logSimpleStatusResponse($driver, $response);
 
         return $response;
+    }
+
+    /**
+     * @param string $driver
+     * @param CreateOrderResponseDto $response
+     * @param OrderTypeRid $orderTypeRid
+     * @return void
+     */
+    private function logCreateOrderResponse(
+        string $driver,
+        CreateOrderResponseDto $response,
+        OrderTypeRid $orderTypeRid,
+    ): void
+    {
+        $order = $response->order;
+        $logFolder = "Payment/{$driver}/CreateOrder/{$orderTypeRid->value}";
+
+        $context = [
+            'OrderId' => $order?->id,
+            'httpCode' => $response->httpCode,
+            'Curl Error' => $response->curlError,
+            'Curl Errno' => $response->curlErrno,
+            'hppUrl' => $order?->hppUrl,
+            'status' => $order?->status,
+            'cvv2AuthStatus' => $order?->cvv2AuthStatus,
+        ];
+
+        $this->logService->log($logFolder, $context);
+    }
+
+    /**
+     * @param string $driver
+     * @param SimpleStatusResponseDto $response
+     * @return void
+     */
+    private function logSimpleStatusResponse(string $driver, SimpleStatusResponseDto $response): void
+    {
+        $order = $response->order;
+        $logFolder = "Payment/{$driver}/GetSimpleStatus";
+
+        $context = [
+            'OrderId' => $order?->id,
+            'httpCode' => $response->httpCode,
+            'Curl Error' => $response->curlError,
+            'Curl Errno' => $response->curlErrno,
+            'status' => $order?->status,
+        ];
+
+        $this->logService->log($logFolder, $context);
     }
 }

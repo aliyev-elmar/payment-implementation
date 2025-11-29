@@ -6,9 +6,9 @@ interface ILogger
 {
     /**
      * @param string $folder
-     * @param string $text
+     * @param array $context
      * @param int $mkDirPermission
      * @return void
      */
-    public function log(string $folder, string $text, int $mkDirPermission = 0777): void;
+    public function log(string $folder, array $context, int $mkDirPermission = 0777): void;
 }
