@@ -125,7 +125,6 @@ class KapitalBankRepository implements IPaymentGateway
             order: $order,
             curlError: $apiResponse->curlError,
             curlErrno: $apiResponse->curlErrno,
-            logFolderPath: "Payment/KapitalBank/CreateOrder/{$orderTypeRid->value}",
             formUrl: "{$order->hppUrl}?id={$order->id}&password={$order->password}",
         );
     }
@@ -174,7 +173,6 @@ class KapitalBankRepository implements IPaymentGateway
             order: $simpleStatus,
             curlError: $apiResponse->curlError,
             curlErrno: $apiResponse->curlErrno,
-            logFolderPath: "Payment/KapitalBank/GetSimpleStatus",
         );
     }
 

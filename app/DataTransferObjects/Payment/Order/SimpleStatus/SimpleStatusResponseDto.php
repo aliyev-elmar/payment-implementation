@@ -9,14 +9,12 @@ class SimpleStatusResponseDto
      * @param SimpleStatusDto|null $order
      * @param string|null $curlError
      * @param string|null $curlErrno
-     * @param string|null $logFolderPath
      */
     public function __construct(
         public int $httpCode,
         public ?SimpleStatusDto $order = null,
         public ?string $curlError = null,
         public ?string $curlErrno = null,
-        public ?string $logFolderPath = null,
     )
     {
     }

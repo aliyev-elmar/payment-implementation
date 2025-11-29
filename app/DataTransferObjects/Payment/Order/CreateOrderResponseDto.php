@@ -11,7 +11,6 @@ class CreateOrderResponseDto extends Dto
      * @param CreateOrderDto|null $order
      * @param string|null $curlError
      * @param string|null $curlErrno
-     * @param string|null $logFolderPath
      * @param string|null $formUrl
      */
     public function __construct(
@@ -19,7 +18,6 @@ class CreateOrderResponseDto extends Dto
         public ?CreateOrderDto $order = null,
         public ?string $curlError = null,
         public ?string $curlErrno = null,
-        public ?string $logFolderPath = null,
         public ?string $formUrl = null,
     )
     {
