@@ -2,7 +2,9 @@
 
 namespace App\DataTransferObjects\Payment\Order\SimpleStatus;
 
-class SimpleStatusResponseDto
+use App\DataTransferObjects\Dto;
+
+class SimpleStatusResponseDto extends Dto
 {
     /**
      * @param int $httpCode
