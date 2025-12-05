@@ -7,7 +7,6 @@ use App\Http\Requests\Order\StoreRequest;
 use App\Services\PaymentService;
 use Illuminate\Http\{Response, JsonResponse};
 use App\Exceptions\{PaymentGatewayException, OrderNotFoundException};
-use Throwable;
 
 class OrderController extends Controller
 {
@@ -41,7 +40,7 @@ class OrderController extends Controller
             return response()->json(['formUrl' => $formUrl], Response::HTTP_CREATED);
         } catch (PaymentGatewayException $e) {
             return response()->json(['message' => 'Payment gateway error', 'details' => $e->getMessage()], $e->statusCode);
-        } catch (Throwable) {
+        } catch (\Exception) {
             return response()->json(['message' => 'Internal server error during order creation'], Response::HTTP_INTERNAL_SERVER_ERROR);
         }
     }
@@ -59,7 +58,7 @@ class OrderController extends Controller
             return response()->json(['message' => $e->getMessage()], Response::HTTP_NOT_FOUND);
         } catch (PaymentGatewayException $e) {
             return response()->json(['message' => 'Payment gateway error', 'details' => $e->getMessage()], $e->statusCode);
-        } catch (Throwable) {
+        } catch (\Exception) {
             return response()->json(['message' => 'Internal server error while fetching order simple status'], Response::HTTP_INTERNAL_SERVER_ERROR);
         }
     }
