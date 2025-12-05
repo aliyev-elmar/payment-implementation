@@ -1,4 +1,4 @@
-# Laravel Payment Integration API
+# PHP/Laravel Payment Implementation Project
 
 A robust Laravel PHP payment gateway system implementing modern design patterns and SOLID principles, designed for seamless payment provider integrations with extensible, maintainable codebase.
 
@@ -192,8 +192,8 @@ Creates a new payment order and returns a payment form URL.
 **Request Body:**
 ```json
 {
-    "amount": 10000,
-    "description": "Payment for Order #12345"
+  "amount": 10000,
+  "description": "Payment for Order #12345"
 }
 ```
 
@@ -204,7 +204,7 @@ Creates a new payment order and returns a payment form URL.
 **Success Response (201 Created):**
 ```json
 {
-    "formUrl": "https://hpp.kapitalbank.az?id=ORDER123&password=SECRET"
+  "formUrl": "https://hpp.kapitalbank.az?id=ORDER123&password=SECRET"
 }
 ```
 
@@ -213,15 +213,15 @@ Creates a new payment order and returns a payment form URL.
 *Payment Gateway Error (4xx/5xx):*
 ```json
 {
-    "message": "Payment gateway error",
-    "details": "`errorCode: 400, errorDescription: Invalid amount` on Kapital Bank"
+  "message": "Payment gateway error",
+  "details": "`errorCode: 400, errorDescription: Invalid amount` on Kapital Bank"
 }
 ```
 
 *Internal Server Error (500):*
 ```json
 {
-    "message": "Internal server error during order creation"
+  "message": "Internal server error during order creation"
 }
 ```
 
@@ -238,17 +238,17 @@ Retrieves the current status of a payment order.
 **Success Response (200 OK):**
 ```json
 {
-    "order": {
-        "id": 12345,
-        "typeRid": "Order_SMS",
-        "status": "FullyPaid",
-        "lastStatusLogin": "2025-12-05T14:30:00Z",
-        "amount": 10000,
-        "currency": "AZN",
-        "type": {
-            "title": "Purchase"
-        }
+  "order": {
+    "id": 12345,
+    "typeRid": "Order_SMS",
+    "status": "FullyPaid",
+    "lastStatusLogin": "2025-12-05T14:30:00Z",
+    "amount": 10000,
+    "currency": "AZN",
+    "type": {
+      "title": "Purchase"
     }
+  }
 }
 ```
 
@@ -257,15 +257,15 @@ Retrieves the current status of a payment order.
 *Order Not Found (404):*
 ```json
 {
-    "message": "Order not found on Kapital Bank"
+  "message": "Order not found on Kapital Bank"
 }
 ```
 
 *Payment Gateway Error (4xx/5xx):*
 ```json
 {
-    "message": "Payment gateway error",
-    "details": "`errorCode: 404, errorDescription: Order not found` on Kapital Bank"
+  "message": "Payment gateway error",
+  "details": "`errorCode: 404, errorDescription: Order not found` on Kapital Bank"
 }
 ```
 
