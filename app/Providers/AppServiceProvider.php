@@ -15,11 +15,6 @@ class AppServiceProvider extends ServiceProvider
             \App\Contracts\ILogger::class,
             \App\Services\LogService::class,
         );
-
-        $this->app->bind(
-            \App\Contracts\IPaymentGateway::class,
-            \App\Repositories\Payment\KapitalBankRepository::class,
-        );
     }
 
     /**
