@@ -11,16 +11,10 @@ use App\Exceptions\{PaymentGatewayException, OrderNotFoundException};
 class OrderController extends Controller
 {
     /**
-     * @var string
-     */
-    private readonly string $paymentDriver;
-
-    /**
      * @param PaymentService $paymentService
      */
     public function __construct(private readonly PaymentService $paymentService)
     {
-        $this->paymentDriver = config('payment.default_driver');
     }
 
     /**
@@ -31,7 +25,7 @@ class OrderController extends Controller
     {
         try {
             $formUrl = $this->paymentService->createOrder(
-                $this->paymentDriver,
+                config('payment.default_driver'),
                 $request->get('amount'),
                 $request->get('description'),
                 OrderTypeRid::Purchase,
@@ -52,7 +46,11 @@ class OrderController extends Controller
     public function getSimpleStatusById(int $orderId): JsonResponse
     {
         try {
-            $simpleStatusResponse = $this->paymentService->getSimpleStatusByOrderId($this->paymentDriver, $orderId);
+            $simpleStatusResponse = $this->paymentService->getSimpleStatusByOrderId(
+                config('payment.default_driver'),
+                $orderId,
+            );
+
             return response()->json(['order' => $simpleStatusResponse->order], $simpleStatusResponse->httpCode);
         } catch (OrderNotFoundException $e) {
             return response()->json(['message' => $e->getMessage()], Response::HTTP_NOT_FOUND);
