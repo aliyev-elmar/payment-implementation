@@ -35,11 +35,6 @@ class KapitalBankRepository implements IPaymentGateway
     /**
      * @var string
      */
-    private string $contentType = 'application/json';
-
-    /**
-     * @var string
-     */
     private string $currency = 'AZN';
 
     /**
@@ -181,11 +176,12 @@ class KapitalBankRepository implements IPaymentGateway
      */
     private function getHeader(): array
     {
+        $contentType = 'application/json';
         $token = base64_encode($this->user . ':' . $this->pass);
 
         return [
-            "Accept: {$this->contentType}",
-            "Content-Type: {$this->contentType}",
+            "Accept: {$contentType}",
+            "Content-Type: {$contentType}",
             "Authorization: Basic {$token}"
         ];
     }
