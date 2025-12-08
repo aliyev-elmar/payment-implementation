@@ -1,6 +1,11 @@
 # PHP/Laravel Payment Implementation Project
-
 A robust Laravel PHP payment gateway system implementing modern design patterns and SOLID principles, designed for seamless payment provider integrations with extensible, maintainable codebase.
+
+Note: This project was built to support multiple payment systems simultaneously with a provider-agnostic architecture. Currently implemented with Kapital Bank as the reference integration, demonstrating the extensible design that allows easy addition of other payment providers.
+
+📚 Documentation & Resources
+
+Kapital Bank API Documentation: https://pg.kapitalbank.az/docs
 
 ## 🏗️ Architecture & Design Patterns
 
