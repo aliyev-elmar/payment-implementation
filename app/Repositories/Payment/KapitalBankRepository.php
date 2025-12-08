@@ -75,13 +75,13 @@ class KapitalBankRepository implements IPaymentGateway
     }
 
     /**
+     * @param OrderTypeRid $orderTypeRid
      * @param int $amount
      * @param string $description
-     * @param OrderTypeRid $orderTypeRid
      * @return CreateOrderResponseDto
      * @throws PaymentGatewayException
      */
-    public function createOrder(int $amount, string $description, OrderTypeRid $orderTypeRid): CreateOrderResponseDto
+    public function createOrder(OrderTypeRid $orderTypeRid, int $amount, string $description): CreateOrderResponseDto
     {
         $apiResponse = $this->curlService->postRequest(
             $this->apiUrl,

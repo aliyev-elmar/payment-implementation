@@ -22,15 +22,15 @@ class PaymentService
 
     /**
      * @param string $driver
+     * @param OrderTypeRid $orderTypeRid
      * @param int $amount
      * @param string $description
-     * @param OrderTypeRid $orderTypeRid
      * @return string|null
      */
-    public function createOrder(string $driver, int $amount, string $description, OrderTypeRid $orderTypeRid): ?string
+    public function createOrder(string $driver, OrderTypeRid $orderTypeRid, int $amount, string $description): ?string
     {
         $gateway = $this->paymentDriverFactory->driver($driver);
-        $response = $gateway->createOrder($amount, $description, $orderTypeRid);
+        $response = $gateway->createOrder($orderTypeRid, $amount, $description);
         $this->logCreateOrderResponse($driver, $response, $orderTypeRid);
 
         return $response->formUrl;

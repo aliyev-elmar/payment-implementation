@@ -26,9 +26,9 @@ class OrderController extends Controller
         try {
             $formUrl = $this->paymentService->createOrder(
                 config('payment.default_driver'),
-                $request->get('amount'),
-                $request->get('description'),
                 OrderTypeRid::Purchase,
+                $request->get('amount'),
+                $request->get('description', 'description for create order process'),
             );
 
             return response()->json(['formUrl' => $formUrl], Response::HTTP_CREATED);
