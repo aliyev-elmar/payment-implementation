@@ -1,12 +1,10 @@
 # PHP/Laravel Payment Implementation Project
+
 A robust Laravel PHP payment gateway system implementing modern design patterns and SOLID principles, designed for seamless payment provider integrations with extensible, maintainable codebase.
 
-Note: This project was built to support multiple payment systems simultaneously with a provider-agnostic architecture. Currently implemented with Kapital Bank as the reference integration, demonstrating the extensible design that allows easy addition of other payment providers.
+> **Note**: This project was built to support multiple payment systems simultaneously with a provider-agnostic architecture. Currently implemented with **Kapital Bank** as the reference integration, demonstrating the extensible design that allows easy addition of other payment providers.
 
-📚 Documentation & Resources
-
-Kapital Bank API Documentation: https://pg.kapitalbank.az/docs
-
+---
 ## 🏗️ Architecture & Design Patterns
 
 ### **Repository Pattern - Payment Provider Abstraction**
@@ -79,7 +77,7 @@ Each class has one clear responsibility:
 ```php
 // Closed for modification
 interface IPaymentGateway {
-    public function createOrder(int $amount, string $description, OrderTypeRid $orderTypeRid): CreateOrderResponseDto;
+    public function createOrder(OrderTypeRid $orderTypeRid, int $amount, string $description): CreateOrderResponseDto;
     public function getSimpleStatusByOrderId(int $orderId): SimpleStatusResponseDto;
 }
 
@@ -98,7 +96,7 @@ All `IPaymentGateway` implementations are interchangeable:
 ```php
 // Any gateway can be substituted without breaking the system
 $gateway = $factory->driver('kapitalbank'); // or 'stripe', 'paypal', etc.
-$response = $gateway->createOrder($amount, $description, OrderTypeRid::Purchase);
+$response = $gateway->createOrder(OrderTypeRid::Purchase, $amount, $description);
 ```
 
 ### **Interface Segregation Principle (ISP)**
@@ -238,7 +236,7 @@ Retrieves the current status of a payment order.
 **Rate Limit:** 30 requests per minute
 
 **Path Parameters:**
-- `orderId` (integer): The order ID returned from create order
+- `orderId` (integer): The order ID to check status
 
 **Success Response (200 OK):**
 ```json
@@ -300,7 +298,7 @@ class StripeRepository implements IPaymentGateway
         // Initialize
     }
 
-    public function createOrder(int $amount, string $description, OrderTypeRid $orderTypeRid): CreateOrderResponseDto
+    public function createOrder(OrderTypeRid $orderTypeRid, int $amount, string $description): CreateOrderResponseDto
     {
         // Implementation
     }
@@ -352,17 +350,17 @@ STRIPE_TEST_API_KEY=sk_test_...
 // Automatically uses the driver from PAYMENT_DEFAULT_DRIVER
 $formUrl = $this->paymentService->createOrder(
     config('payment.default_driver'),
+    OrderTypeRid::Purchase,
     $amount,
-    $description,
-    OrderTypeRid::Purchase
+    $description
 );
 
 // Or specify explicitly
 $formUrl = $this->paymentService->createOrder(
     'stripe',
+    OrderTypeRid::Purchase,
     $amount,
-    $description,
-    OrderTypeRid::Purchase
+    $description
 );
 ```
 
@@ -449,9 +447,9 @@ class CheckoutController extends Controller
         try {
             $formUrl = $this->paymentService->createOrder(
                 driver: 'kapitalbank',
+                orderTypeRid: OrderTypeRid::Purchase,
                 amount: 50000, // 500.00 AZN
-                description: 'Order #' . $request->order_id,
-                orderTypeRid: OrderTypeRid::Purchase
+                description: 'Order #' . $request->order_id
             );
             
             return redirect($formUrl);
@@ -581,6 +579,10 @@ This project is open source and available under the [MIT License](LICENSE).
 ## 👥 Author
 
 **Elmar Aliyev** - [@aliyev-elmar](https://github.com/aliyev-elmar)
+
+## 📚 Documentation & Resources
+
+- **Kapital Bank API Documentation**: [https://pg.kapitalbank.az/docs](https://pg.kapitalbank.az/docs)
 
 ---
 
