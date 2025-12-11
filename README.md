@@ -1,6 +1,6 @@
 # PHP/Laravel Payment Implementation Project
 
-A robust Laravel PHP payment gateway system implementing modern design patterns and SOLID principles, designed for seamless payment provider integrations with extensible, maintainable codebase.
+A robust Laravel payment gateway system implementing modern design patterns and SOLID principles, designed for seamless payment provider integrations with extensible, maintainable codebase.
 
 > **Note**: This project was built to support multiple payment systems simultaneously with a provider-agnostic architecture. Currently implemented with **Kapital Bank** as the reference integration, demonstrating the extensible design that allows easy addition of other payment providers.
 
@@ -888,7 +888,16 @@ Contributions are welcome! Please follow these guidelines:
 
 ## 📄 License
 
-This project is open source and available under the [MIT License](LICENSE).
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+**Key Points:**
+- ✅ Free to use for commercial purposes
+- ✅ Modify and distribute as needed
+- ✅ Private use allowed
+- ⚠️ Must include original copyright notice
+- ❌ No warranty provided
+
+Copyright © 2025 [Elmar Aliyev](https://github.com/aliyev-elmar)
 
 ## 👥 Author
 
@@ -902,7 +911,3 @@ This project is open source and available under the [MIT License](LICENSE).
 ## 📚 Additional Resources
 
 * Kapital Bank API Documentation: https://pg.kapitalbank.az/docs
-
----
-
-**Built with ❤️ using Laravel**
