@@ -897,11 +897,11 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 - ⚠️ Must include original copyright notice
 - ❌ No warranty provided
 
-Copyright © 2025 [Elmar Aliyev](https://github.com/aliyev-elmar)
-
 ## 👥 Author
 
 **Elmar Aliyev** - [@aliyev-elmar](https://github.com/aliyev-elmar)
+
+Copyright © 2025 Elmar Aliyev
 
 ## 🙏 Acknowledgments
 
