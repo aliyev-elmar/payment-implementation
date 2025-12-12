@@ -78,7 +78,7 @@ class KapitalBankRepository implements IPaymentGateway
      */
     public function createOrder(OrderTypeRid $orderTypeRid, int $amount, string $description): CreateOrderResponseDto
     {
-        $apiResponse = $this->curlService->postRequest(
+        $curlResponseDto = $this->curlService->postRequest(
             $this->apiUrl,
             $this->getHeader(),
             json_encode([
@@ -94,12 +94,11 @@ class KapitalBankRepository implements IPaymentGateway
             ]),
         );
 
-        $response = $apiResponse->response;
-
-        if($apiResponse->httpCode != Response::HTTP_OK) {
+        $response = $curlResponseDto->response;
+        if($curlResponseDto->httpCode != Response::HTTP_OK) {
             throw new PaymentGatewayException(
                 $this->paymentGateway,
-                $apiResponse->httpCode,
+                $curlResponseDto->httpCode,
                 $response?->errorCode,
                 $response?->errorDescription,
             );
@@ -107,19 +106,19 @@ class KapitalBankRepository implements IPaymentGateway
 
         $order = $response?->order;
         $order = new CreateOrderDto(
-            id: $order->id,
-            hppUrl: $order->hppUrl,
-            password: $order->password,
-            status: $order->status,
-            cvv2AuthStatus: $order->cvv2AuthStatus,
-            secret: $order->secret,
+            id: self::getPropertyValueByObject($order, 'id'),
+            hppUrl: self::getPropertyValueByObject($order, 'hppUrl'),
+            password: self::getPropertyValueByObject($order, 'password'),
+            status: self::getPropertyValueByObject($order, 'status'),
+            cvv2AuthStatus: self::getPropertyValueByObject($order, 'cvv2AuthStatus'),
+            secret: self::getPropertyValueByObject($order, 'secret'),
         );
 
         return new CreateOrderResponseDto(
-            httpCode: $apiResponse->httpCode,
+            httpCode: $curlResponseDto->httpCode,
             order: $order,
-            curlError: $apiResponse->curlError,
-            curlErrno: $apiResponse->curlErrno,
+            curlError: $curlResponseDto->curlError,
+            curlErrno: $curlResponseDto->curlErrno,
             formUrl: "{$order->hppUrl}?id={$order->id}&password={$order->password}",
         );
     }
@@ -132,13 +131,13 @@ class KapitalBankRepository implements IPaymentGateway
      */
     public function getSimpleStatusByOrderId(int $orderId): SimpleStatusResponseDto
     {
-        $apiResponse = $this->curlService->getRequest($this->apiUrl . $orderId, $this->getHeader());
-        $response = $apiResponse->response;
+        $curlResponseDto = $this->curlService->getRequest($this->apiUrl . $orderId, $this->getHeader());
+        $response = $curlResponseDto->response;
 
-        if($apiResponse->httpCode != Response::HTTP_OK) {
+        if($curlResponseDto->httpCode != Response::HTTP_OK) {
             throw new PaymentGatewayException(
                 $this->paymentGateway,
-                $apiResponse->httpCode,
+                $curlResponseDto->httpCode,
                 $response?->errorCode,
                 $response?->errorDescription,
             );
@@ -149,8 +148,11 @@ class KapitalBankRepository implements IPaymentGateway
             throw new OrderNotFoundException($this->paymentGateway);
         }
 
+        $orderType = self::getPropertyValueByObject($order, 'type');
+        $orderTypeTitle = self::getPropertyValueByObject($orderType, 'title');
+
         $simpleStatusType = new SimpleStatusType(
-            title: $order->type->title,
+            title: $orderTypeTitle,
         );
 
         $simpleStatus = new SimpleStatusDto(
@@ -164,10 +166,10 @@ class KapitalBankRepository implements IPaymentGateway
         );
 
         return new SimpleStatusResponseDto(
-            httpCode: $apiResponse->httpCode,
+            httpCode: $curlResponseDto->httpCode,
             order: $simpleStatus,
-            curlError: $apiResponse->curlError,
-            curlErrno: $apiResponse->curlErrno,
+            curlError: $curlResponseDto->curlError,
+            curlErrno: $curlResponseDto->curlErrno,
         );
     }
 
@@ -184,5 +186,16 @@ class KapitalBankRepository implements IPaymentGateway
             "Content-Type: {$contentType}",
             "Authorization: Basic {$token}"
         ];
+    }
+
+    /**
+     * @param object|null $object
+     * @param string $property
+     * @return mixed
+     */
+    private static function getPropertyValueByObject(?object $object, string $property): mixed
+    {
+        if(is_null($object)) return null;
+        return property_exists($object, $property) ? $object->{$property} : null;
     }
 }
