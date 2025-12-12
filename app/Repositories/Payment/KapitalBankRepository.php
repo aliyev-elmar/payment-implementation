@@ -156,12 +156,15 @@ class KapitalBankRepository implements IPaymentGateway
         );
 
         $simpleStatus = new SimpleStatusDto(
-            id: $order->id,
-            typeRid: $order->typeRid,
-            status: $order->status,
-            lastStatusLogin: $order->lastStatusLogin,
-            amount: $order->amount,
-            currency: $order->currency,
+            id: self::getPropertyValueByObject($order, 'id'),
+            typeRid: self::getPropertyValueByObject($order, 'typeRid'),
+            status: self::getPropertyValueByObject($order, 'status'),
+            prevStatus: self::getPropertyValueByObject($order, 'prevStatus'),
+            lastStatusLogin: self::getPropertyValueByObject($order, 'lastStatusLogin'),
+            amount: self::getPropertyValueByObject($order, 'amount'),
+            currency: self::getPropertyValueByObject($order, 'currency'),
+            createTime: self::getPropertyValueByObject($order, 'createTime'),
+            finishTime: self::getPropertyValueByObject($order, 'finishTime'),
             type: $simpleStatusType,
         );
 
