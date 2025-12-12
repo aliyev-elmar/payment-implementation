@@ -10,7 +10,7 @@ class SimpleStatusDto extends Dto
      * @param int $id
      * @param string $typeRid
      * @param string $status
-     * @param string $prevStatus
+     * @param string|null $prevStatus
      * @param string $lastStatusLogin
      * @param int $amount
      * @param string $currency
@@ -22,7 +22,7 @@ class SimpleStatusDto extends Dto
         public int $id,
         public string $typeRid,
         public string $status,
-        public string $prevStatus,
+        public ?string $prevStatus,
         public string $lastStatusLogin,
         public int $amount,
         public string $currency,
