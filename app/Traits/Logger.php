@@ -1,11 +1,10 @@
 <?php
 
-namespace App\Services;
+namespace App\Traits;
 
-use App\Contracts\ILogger;
 use Illuminate\Support\Facades\File;
 
-class LogService implements ILogger
+trait Logger
 {
     /**
      * @param string $folder

@@ -2,20 +2,15 @@
 
 namespace App\Services;
 
-use App\Contracts\ILogger;
-use App\Enums\Payment\Order\OrderTypeRid;
 use App\DataTransferObjects\Payment\Order\SimpleStatus\SimpleStatusResponseDto;
+use App\Enums\Payment\Order\OrderTypeRid;
 
 class PaymentService
 {
     /**
-     * @param ILogger $logService
      * @param PaymentDriverFactory $paymentDriverFactory
      */
-    public function __construct(
-        private readonly ILogger $logService,
-        private readonly PaymentDriverFactory $paymentDriverFactory,
-    )
+    public function __construct(private readonly PaymentDriverFactory $paymentDriverFactory)
     {
     }
 
@@ -30,20 +25,7 @@ class PaymentService
     {
         $gateway = $this->paymentDriverFactory->driver($driver);
         $response = $gateway->createOrder($orderTypeRid, $amount, $description);
-        $order = $response->order;
-
-        $this->logService->log("Payment/{$driver}/CreateOrder/{$orderTypeRid->value}", [
-            'OrderId' => $order?->id,
-            'httpCode' => $response->httpCode,
-            'Curl Error' => $response->curlError,
-            'Curl Errno' => $response->curlErrno,
-            'hppUrl' => $order?->hppUrl,
-            'status' => $order?->status,
-            'cvv2AuthStatus' => $order?->cvv2AuthStatus,
-        ]);
-
         return $response->formUrl;
-
     }
 
     /**
@@ -54,17 +36,6 @@ class PaymentService
     public function getSimpleStatusByOrderId(string $driver, int $orderId): SimpleStatusResponseDto
     {
         $gateway = $this->paymentDriverFactory->driver($driver);
-        $response = $gateway->getSimpleStatusByOrderId($orderId);
-        $order = $response->order;
-
-        $this->logService->log("Payment/{$driver}/GetSimpleStatus", [
-            'OrderId' => $order?->id,
-            'httpCode' => $response->httpCode,
-            'Curl Error' => $response->curlError,
-            'Curl Errno' => $response->curlErrno,
-            'status' => $order?->status,
-        ]);
-
-        return $response;
+        return $gateway->getSimpleStatusByOrderId($orderId);
     }
 }

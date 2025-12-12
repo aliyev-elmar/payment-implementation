@@ -4,14 +4,33 @@ namespace App\Repositories\Payment;
 
 use App\Contracts\IPaymentGateway;
 use App\Enums\Payment\Order\OrderTypeRid;
-use App\DataTransferObjects\Payment\Order\{CreateOrderDto, CreateOrderResponseDto};
-use App\DataTransferObjects\Payment\Order\SimpleStatus\{SimpleStatusDto, SimpleStatusResponseDto, SimpleStatusType};
+use App\Traits\Logger;
 use App\Services\CurlService;
 use Illuminate\Http\Response;
-use App\Exceptions\{PaymentGatewayException, OrderNotFoundException};
+use App\DataTransferObjects\Payment\Order\SetSourceToken\{
+    SetSourceTokenDto,
+    SourceTokenDto,
+    SourceTokenCardDto,
+    SetSourceTokenResponseDto,
+};
+use App\DataTransferObjects\Payment\Order\{
+    CreateOrderDto,
+    CreateOrderResponseDto,
+};
+use App\DataTransferObjects\Payment\Order\SimpleStatus\{
+    SimpleStatusDto,
+    SimpleStatusResponseDto,
+    SimpleStatusType,
+};
+use App\Exceptions\{
+    InvalidRequestException,
+    OrderNotFoundException,
+};
 
 class KapitalBankRepository implements IPaymentGateway
 {
+    use Logger;
+
     /**
      * @var string
      */
@@ -74,7 +93,7 @@ class KapitalBankRepository implements IPaymentGateway
      * @param int $amount
      * @param string $description
      * @return CreateOrderResponseDto
-     * @throws PaymentGatewayException
+     * @throws InvalidRequestException
      */
     public function createOrder(OrderTypeRid $orderTypeRid, int $amount, string $description): CreateOrderResponseDto
     {
@@ -89,22 +108,25 @@ class KapitalBankRepository implements IPaymentGateway
                     'language' => $this->language,
                     'description' => $description,
                     'hppRedirectUrl' => $this->hppRedirectUrl,
-                    'hppCofCapturePurposes' => $this->hppCofCapturePurposes,
+                    'hppCofCapturePurposes' => $this->hppCofCapturePurposes
                 ]
             ]),
         );
 
         $response = $curlResponseDto->response;
-        if($curlResponseDto->httpCode != Response::HTTP_OK) {
-            throw new PaymentGatewayException(
-                $this->paymentGateway,
-                $curlResponseDto->httpCode,
-                $response?->errorCode,
-                $response?->errorDescription,
-            );
+        $order = $response?->order;
+
+        $this->log("Payment/KapitalBank/CreateOrder/{$orderTypeRid->value}", [
+            'response' => json_encode($response),
+            'httpCode' => $curlResponseDto->httpCode,
+            'curlError' => $curlResponseDto->curlError,
+            'curlErrno' => $curlResponseDto->curlErrno,
+        ]);
+
+        if($curlResponseDto->httpCode != Response::HTTP_BAD_REQUEST) {
+            throw new InvalidRequestException(self::getPropertyValueByObject($response, 'errorDescription'));
         }
 
-        $order = $response?->order;
         $order = new CreateOrderDto(
             id: self::getPropertyValueByObject($order, 'id'),
             hppUrl: self::getPropertyValueByObject($order, 'hppUrl'),
@@ -125,25 +147,95 @@ class KapitalBankRepository implements IPaymentGateway
 
     /**
      * @param int $orderId
+     * @param string $orderPassword
+     * @return SetSourceTokenResponseDto
+     */
+    public function setSourceToken(int $orderId, string $orderPassword): SetSourceTokenResponseDto
+    {
+        $curlResponseDto = $this->curlService->postRequest(
+            $this->apiUrl . $orderId . "/set-src-token?password=$orderPassword",
+            $this->getHeader(),
+            json_encode([
+                'order' => [
+                    'initiationEnvKind' => 'Server'
+                ],
+                'token' => [
+                    'storedId' => $orderId
+                ]
+            ]),
+        );
+
+        $response = $curlResponseDto->response;
+        $order = $response?->order;
+        $srcToken = $response?->srcToken;
+        $card = $srcToken?->card;
+
+        $this->log("Payment/KapitalBank/SetSourceToken", [
+            'response' => json_encode($response),
+            'httpCode' => $curlResponseDto->httpCode,
+            'curlError' => $curlResponseDto->curlError,
+            'curlErrno' => $curlResponseDto->curlErrno,
+        ]);
+
+        if($curlResponseDto->httpCode != Response::HTTP_BAD_REQUEST) {
+            throw new InvalidRequestException(self::getPropertyValueByObject($response, 'errorDescription'));
+        }
+
+        $card = new SourceTokenCardDto(
+            expiration: self::getPropertyValueByObject($card, 'expiration'),
+            brand: self::getPropertyValueByObject($card, 'brand'),
+        );
+
+        $srcToken = new SourceTokenDto(
+            id: self::getPropertyValueByObject($srcToken, 'id'),
+            paymentMethod: self::getPropertyValueByObject($srcToken, 'paymentMethod'),
+            role: self::getPropertyValueByObject($srcToken, 'role'),
+            status: self::getPropertyValueByObject($srcToken, 'status'),
+            regTime: self::getPropertyValueByObject($srcToken, 'regTime'),
+            displayName: self::getPropertyValueByObject($srcToken, 'displayName'),
+            card: $card,
+        );
+
+        $order = new SetSourceTokenDto(
+            status: self::getPropertyValueByObject($order, 'status'),
+            cvv2AuthStatus: self::getPropertyValueByObject($order, 'cvv2AuthStatus'),
+            tdsV1AuthStatus: self::getPropertyValueByObject($order, 'tdsV1AuthStatus'),
+            tdsV2AuthStatus: self::getPropertyValueByObject($order, 'tdsV2AuthStatus'),
+            otpAutStatus: self::getPropertyValueByObject($order, 'otpAutStatus'),
+            srcToken: $srcToken,
+        );
+
+        return new SetSourceTokenResponseDto(
+            httpCode: $curlResponseDto->httpCode,
+            order: $order,
+            curlError: $curlResponseDto->curlError,
+            curlErrno: $curlResponseDto->curlErrno,
+        );
+    }
+
+    /**
+     * @param int $orderId
      * @return SimpleStatusResponseDto
-     * @throws PaymentGatewayException
+     * @throws InvalidRequestException
      * @throws OrderNotFoundException
      */
     public function getSimpleStatusByOrderId(int $orderId): SimpleStatusResponseDto
     {
         $curlResponseDto = $this->curlService->getRequest($this->apiUrl . $orderId, $this->getHeader());
         $response = $curlResponseDto->response;
+        $order = $response?->order;
 
-        if($curlResponseDto->httpCode != Response::HTTP_OK) {
-            throw new PaymentGatewayException(
-                $this->paymentGateway,
-                $curlResponseDto->httpCode,
-                $response?->errorCode,
-                $response?->errorDescription,
-            );
+        $this->log("Payment/KapitalBank/GetSimpleStatus", [
+            'response' => json_encode($response),
+            'httpCode' => $curlResponseDto->httpCode,
+            'curlError' => $curlResponseDto->curlError,
+            'curlErrno' => $curlResponseDto->curlErrno,
+        ]);
+
+        if($curlResponseDto->httpCode != Response::HTTP_BAD_REQUEST) {
+            throw new InvalidRequestException(self::getPropertyValueByObject($response, 'errorDescription'));
         }
 
-        $order = $response?->order;
         if(is_null($order)) {
             throw new OrderNotFoundException($this->paymentGateway);
         }
