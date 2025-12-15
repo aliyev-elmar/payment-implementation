@@ -74,8 +74,9 @@ class OrderService
         $response = $this->paymentService->getSimpleStatusByOrderId($driver, $orderId);
 
         $order = $this->orderRepository->getByExternalId($orderId);
-        $this->orderRepository->updateStatus($order, $response->order->status);
+        if(!$order) throw new OrderNotFoundException();
 
+        $this->orderRepository->updateStatus($order, $response->order->status);
         return $response;
     }
 }
