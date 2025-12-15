@@ -4,6 +4,7 @@ namespace App\Repositories\PaymentGateways;
 
 use App\Contracts\IPaymentGateway;
 use App\Enums\Payment\Currency;
+use App\Enums\Payment\ErrorCode;
 use App\Enums\Payment\Language;
 use App\Enums\Payment\Order\InitiationEnvKind;
 use App\Enums\Payment\Order\OrderTypeRid;
@@ -25,7 +26,12 @@ use App\DataTransferObjects\Payment\Order\SimpleStatus\{
     SimpleStatusResponseDto,
     SimpleStatusType,
 };
-use App\Exceptions\{InvalidOrderStateException, InvalidRequestException, InvalidTokenException, OrderNotFoundException};
+use App\Exceptions\{
+    InvalidOrderStateException,
+    InvalidRequestException,
+    InvalidTokenException,
+    OrderNotFoundException,
+};
 
 class KapitalBankRepository implements IPaymentGateway
 {
@@ -114,6 +120,9 @@ class KapitalBankRepository implements IPaymentGateway
         $response = $curlResponseDto->response;
         $order = $response?->order;
 
+        $errorCode = self::getPropertyValueByObject($response, 'errorCode') ?? '';
+        $errorDescription = self::getPropertyValueByObject($response, 'errorDescription') ?? '';
+
         $this->log("Payment/KapitalBank/CreateOrder/{$orderTypeRid->value}", [
             'response' => json_encode($response),
             'httpCode' => $curlResponseDto->httpCode,
@@ -121,8 +130,8 @@ class KapitalBankRepository implements IPaymentGateway
             'curlErrno' => $curlResponseDto->curlErrno,
         ]);
 
-        if($curlResponseDto->httpCode === Response::HTTP_BAD_REQUEST) {
-            throw new InvalidRequestException(self::getPropertyValueByObject($response, 'errorDescription') ?? '');
+        if($curlResponseDto->httpCode === Response::HTTP_BAD_REQUEST && $errorCode === ErrorCode::INVALID_REQUEST->value) {
+            throw new InvalidRequestException($errorDescription);
         }
 
         $order = new CreateOrderDto(
@@ -181,15 +190,15 @@ class KapitalBankRepository implements IPaymentGateway
             'curlErrno' => $curlResponseDto->curlErrno,
         ]);
 
-        if($curlResponseDto->httpCode === Response::HTTP_BAD_REQUEST && $errorCode === 'InvalidToken') {
+        if($curlResponseDto->httpCode === Response::HTTP_BAD_REQUEST && $errorCode === ErrorCode::INVALID_TOKEN->value) {
             throw new InvalidTokenException($errorDescription);
         }
 
-        if($curlResponseDto->httpCode === Response::HTTP_BAD_REQUEST && $errorCode === 'InvalidRequest') {
+        if($curlResponseDto->httpCode === Response::HTTP_BAD_REQUEST && $errorCode === ErrorCode::INVALID_REQUEST->value) {
             throw new InvalidRequestException($errorDescription);
         }
 
-        if($curlResponseDto->httpCode === Response::HTTP_BAD_REQUEST && $errorCode === 'InvalidOrderState') {
+        if($curlResponseDto->httpCode === Response::HTTP_BAD_REQUEST && $errorCode === ErrorCode::INVALID_ORDER_STATE->value) {
             throw new InvalidOrderStateException($errorDescription);
         }
 
@@ -237,6 +246,9 @@ class KapitalBankRepository implements IPaymentGateway
         $response = $curlResponseDto->response;
         $order = $response?->order;
 
+        $errorCode = self::getPropertyValueByObject($response, 'errorCode') ?? '';
+        $errorDescription = self::getPropertyValueByObject($response, 'errorDescription') ?? '';
+
         $this->log("Payment/KapitalBank/GetSimpleStatus", [
             'response' => json_encode($response),
             'httpCode' => $curlResponseDto->httpCode,
@@ -244,8 +256,8 @@ class KapitalBankRepository implements IPaymentGateway
             'curlErrno' => $curlResponseDto->curlErrno,
         ]);
 
-        if($curlResponseDto->httpCode === Response::HTTP_BAD_REQUEST) {
-            throw new InvalidRequestException(self::getPropertyValueByObject($response, 'errorDescription') ?? '');
+        if($curlResponseDto->httpCode === Response::HTTP_BAD_REQUEST && $errorCode === ErrorCode::INVALID_REQUEST->value) {
+            throw new InvalidRequestException($errorDescription);
         }
 
         if(is_null($order)) {
