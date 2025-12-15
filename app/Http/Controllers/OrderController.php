@@ -4,16 +4,16 @@ namespace App\Http\Controllers;
 
 use App\Enums\Payment\Order\OrderTypeRid;
 use App\Http\Requests\Order\StoreRequest;
-use App\Services\PaymentService;
+use App\Services\OrderService;
 use Illuminate\Http\{Response, JsonResponse};
 use App\Exceptions\{InvalidRequestException, OrderNotFoundException};
 
 class OrderController extends Controller
 {
     /**
-     * @param PaymentService $paymentService
+     * @param OrderService $orderService
      */
-    public function __construct(private readonly PaymentService $paymentService)
+    public function __construct(private readonly OrderService $orderService)
     {
     }
 
@@ -24,7 +24,7 @@ class OrderController extends Controller
     public function store(StoreRequest $request): JsonResponse
     {
         try {
-            $formUrl = $this->paymentService->createOrder(
+            $formUrl = $this->orderService->create(
                 config('payment.default_driver'),
                 OrderTypeRid::Purchase,
                 $request->get('amount'),
@@ -46,7 +46,7 @@ class OrderController extends Controller
     public function getSimpleStatusById(int $orderId): JsonResponse
     {
         try {
-            $simpleStatusResponse = $this->paymentService->getSimpleStatusByOrderId(
+            $simpleStatusResponse = $this->orderService->getSimpleStatusByOrderId(
                 config('payment.default_driver'),
                 $orderId,
             );

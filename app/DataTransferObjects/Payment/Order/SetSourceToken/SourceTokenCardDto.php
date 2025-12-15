@@ -4,7 +4,7 @@ namespace App\DataTransferObjects\Payment\Order\SetSourceToken;
 
 use App\DataTransferObjects\Dto;
 
-class SourceTokenCardDto extends Dto
+readonly class SourceTokenCardDto extends Dto
 {
     /**
      * @param int $expiration

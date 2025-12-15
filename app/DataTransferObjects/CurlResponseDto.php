@@ -2,7 +2,7 @@
 
 namespace App\DataTransferObjects;
 
-class CurlResponseDto extends Dto
+readonly class CurlResponseDto extends Dto
 {
     /**
      * @param object|null $response

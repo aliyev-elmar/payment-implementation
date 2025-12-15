@@ -4,7 +4,7 @@ namespace App\DataTransferObjects\Payment\Order\SetSourceToken;
 
 use App\DataTransferObjects\Dto;
 
-class SetSourceTokenDto extends Dto
+readonly class SetSourceTokenDto extends Dto
 {
     /**
      * @param string $status

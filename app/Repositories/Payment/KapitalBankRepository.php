@@ -3,6 +3,8 @@
 namespace App\Repositories\Payment;
 
 use App\Contracts\IPaymentGateway;
+use App\Enums\Payment\Currency;
+use App\Enums\Payment\Language;
 use App\Enums\Payment\Order\OrderTypeRid;
 use App\Traits\Logger;
 use App\Services\CurlService;
@@ -54,12 +56,12 @@ class KapitalBankRepository implements IPaymentGateway
     /**
      * @var string
      */
-    private string $currency = 'AZN';
+    private readonly string $currency;
 
     /**
      * @var string
      */
-    private string $language = 'az';
+    private readonly string $language;
 
     /**
      * @var array
@@ -86,6 +88,9 @@ class KapitalBankRepository implements IPaymentGateway
         $this->hppRedirectUrl = $hppRedirectUrl;
         $this->user = $user;
         $this->pass = $pass;
+
+        $this->currency = Currency::MANAT->value;
+        $this->language = Language::AZERBAIJANI->value;
     }
 
     /**

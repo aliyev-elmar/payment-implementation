@@ -4,7 +4,7 @@ namespace App\DataTransferObjects\Payment\Order\SimpleStatus;
 
 use App\DataTransferObjects\Dto;
 
-class SimpleStatusDto extends Dto
+readonly class SimpleStatusDto extends Dto
 {
     /**
      * @param int $id

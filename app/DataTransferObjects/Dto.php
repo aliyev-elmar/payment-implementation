@@ -2,7 +2,7 @@
 
 namespace App\DataTransferObjects;
 
-abstract class Dto
+abstract readonly class Dto
 {
     //
 }

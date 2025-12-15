@@ -4,7 +4,7 @@ namespace App\DataTransferObjects\Payment\Order;
 
 use App\DataTransferObjects\Dto;
 
-class CreateOrderResponseDto extends Dto
+readonly class CreateOrderResponseDto extends Dto
 {
     /**
      * @param int $httpCode

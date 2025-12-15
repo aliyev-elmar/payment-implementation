@@ -4,7 +4,7 @@ namespace App\DataTransferObjects\Payment\Order\SetSourceToken;
 
 use App\DataTransferObjects\Dto;
 
-class SourceTokenDto extends Dto
+readonly class SourceTokenDto extends Dto
 {
     /**
      * @param int $id
