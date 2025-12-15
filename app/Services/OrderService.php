@@ -5,13 +5,19 @@ namespace App\Services;
 use App\Enums\Payment\Order\OrderTypeRid;
 use App\DataTransferObjects\Payment\Order\SimpleStatus\SimpleStatusResponseDto;
 use App\DataTransferObjects\Payment\Order\SetSourceToken\SetSourceTokenResponseDto;
+use Illuminate\Support\Facades\{DB, Crypt};
 use App\Repositories\{
     OrderRepository,
     OrderSourceTokenRepository,
     OrderSourceTokenCardRepository,
 };
-use Illuminate\Support\Facades\Crypt;
-use App\Exceptions\OrderNotFoundException;
+use App\Exceptions\{
+    InvalidRequestException,
+    InvalidTokenException,
+    InvalidOrderStateException,
+    OrderNotFoundException,
+};
+use Exception;
 
 class OrderService
 {
@@ -36,47 +42,83 @@ class OrderService
      * @param int $amount
      * @param string $description
      * @return string|null
+     * @throws InvalidRequestException
      */
     public function create(string $driver, OrderTypeRid $orderTypeRid, int $amount, string $description): ?string
     {
-        $response = $this->paymentService->createOrder($driver, $orderTypeRid, $amount, $description);
-        $this->orderRepository->create($response->order);
+        DB::beginTransaction();
+        try {
+            $response = $this->paymentService->createOrder($driver, $orderTypeRid, $amount, $description);
+            $this->orderRepository->create($response->order);
 
-        return $response->formUrl;
+            DB::commit();
+            return $response->formUrl;
+        } catch (InvalidRequestException $e) {
+            DB::rollBack();
+            throw errorResponse($e->getMessage(), $e->statusCode);
+        } catch (Exception) {
+            DB::rollBack();
+            throw errorResponse();
+        }
     }
 
     /**
      * @param string $driver
      * @param int $orderId
      * @return SetSourceTokenResponseDto
+     * @throws InvalidRequestException
+     * @throws InvalidTokenException
+     * @throws InvalidOrderStateException
+     * @throws Exception
      */
-    public function setSourceToken(string $driver, int $orderId) : SetSourceTokenResponseDto
+    public function setSourceToken(string $driver, int $orderId): SetSourceTokenResponseDto
     {
-        $order = $this->orderRepository->getByExternalId($orderId);
-        if(!$order) throw new OrderNotFoundException();
+        DB::beginTransaction();
+        try {
+            $order = $this->orderRepository->getByExternalId($orderId);
+            if(!$order) throw new OrderNotFoundException();
 
-        $response = $this->paymentService->setSourceToken($driver, $orderId, Crypt::decryptString($order->password));
+            $response = $this->paymentService->setSourceToken($driver, $orderId, Crypt::decryptString($order->password));
 
-        $srcToken = $response->order->srcToken;
-        $this->orderSourceTokenRepository->create($orderId, $srcToken);
-        $this->orderSourceTokenCardRepository->create($srcToken->id, $srcToken->card);
+            $srcToken = $response->order->srcToken;
+            $this->orderSourceTokenRepository->create($orderId, $srcToken);
+            $this->orderSourceTokenCardRepository->create($srcToken->id, $srcToken->card);
 
-        return $response;
+            DB::commit();
+            return $response;
+        } catch (InvalidRequestException|InvalidTokenException|InvalidOrderStateException $e) {
+            DB::rollBack();
+            throw errorResponse($e->getMessage(), $e->statusCode);
+        } catch (Exception) {
+            DB::rollBack();
+            throw errorResponse();
+        }
     }
 
     /**
      * @param string $driver
      * @param int $orderId
      * @return SimpleStatusResponseDto
+     * @throws InvalidRequestException
+     * @throws OrderNotFoundException
      */
     public function getSimpleStatusByOrderId(string $driver, int $orderId): SimpleStatusResponseDto
     {
-        $response = $this->paymentService->getSimpleStatusByOrderId($driver, $orderId);
+        DB::beginTransaction();
+        try {
+            $response = $this->paymentService->getSimpleStatusByOrderId($driver, $orderId);
 
-        $order = $this->orderRepository->getByExternalId($orderId);
-        if(!$order) throw new OrderNotFoundException();
+            $order = $this->orderRepository->getByExternalId($orderId);
+            if(!$order) throw new OrderNotFoundException();
 
-        $this->orderRepository->updateStatus($order, $response->order->status);
-        return $response;
+            $this->orderRepository->updateStatus($order, $response->order->status);
+            return $response;
+        } catch (InvalidRequestException|OrderNotFoundException $e) {
+            DB::rollBack();
+            throw errorResponse($e->getMessage(), $e->statusCode);
+        } catch (Exception) {
+            DB::rollBack();
+            throw errorResponse();
+        }
     }
 }

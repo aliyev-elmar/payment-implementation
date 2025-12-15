@@ -24,7 +24,7 @@ use App\DataTransferObjects\Payment\Order\SimpleStatus\{
     SimpleStatusResponseDto,
     SimpleStatusType,
 };
-use App\Exceptions\{InvalidOrderStateException, InvalidRequestException, OrderNotFoundException};
+use App\Exceptions\{InvalidOrderStateException, InvalidRequestException, InvalidTokenException, OrderNotFoundException};
 
 class KapitalBankRepository implements IPaymentGateway
 {
@@ -146,6 +146,9 @@ class KapitalBankRepository implements IPaymentGateway
      * @param int $orderId
      * @param string $orderPassword
      * @return SetSourceTokenResponseDto
+     * @throws InvalidTokenException
+     * @throws InvalidRequestException
+     * @throws InvalidOrderStateException
      */
     public function setSourceToken(int $orderId, string $orderPassword): SetSourceTokenResponseDto
     {
@@ -178,7 +181,7 @@ class KapitalBankRepository implements IPaymentGateway
         ]);
 
         if($curlResponseDto->httpCode === Response::HTTP_BAD_REQUEST && $errorCode === 'InvalidToken') {
-            throw new InvalidRequestException($errorDescription);
+            throw new InvalidTokenException($errorDescription);
         }
 
         if($curlResponseDto->httpCode === Response::HTTP_BAD_REQUEST && $errorCode === 'InvalidRequest') {

@@ -3,10 +3,16 @@
 namespace App\Http\Controllers;
 
 use App\Enums\Payment\Order\OrderTypeRid;
-use App\Http\Requests\Order\StoreRequest;
 use App\Services\OrderService;
-use Illuminate\Http\{Response, JsonResponse};
-use App\Exceptions\{InvalidOrderStateException, InvalidRequestException, InvalidTokenException, OrderNotFoundException};
+use App\Http\Requests\Order\StoreRequest;
+use Illuminate\Http\Response;
+use App\Exceptions\{
+    InvalidRequestException,
+    InvalidTokenException,
+    InvalidOrderStateException,
+    OrderNotFoundException,
+};
+use Exception;
 
 class OrderController extends Controller
 {
@@ -19,70 +25,44 @@ class OrderController extends Controller
 
     /**
      * @param StoreRequest $request
-     * @return JsonResponse
+     * @return Response
+     * @throws InvalidRequestException
      */
-    public function store(StoreRequest $request): JsonResponse
+    public function store(StoreRequest $request): Response
     {
-        try {
-            $formUrl = $this->orderService->create(
-                config('payment.default_driver'),
-                OrderTypeRid::Purchase,
-                $request->get('amount'),
-                $request->get('description', 'description for create order process'),
-            );
+        $formUrl = $this->orderService->create(
+            config('payment.default_driver'),
+            OrderTypeRid::Purchase,
+            $request->get('amount'),
+            $request->get('description', 'description for create order process'),
+        );
 
-            return response()->json(['formUrl' => $formUrl], Response::HTTP_CREATED);
-        } catch (InvalidRequestException $e) {
-            return response()->json(['message' => 'Invalid Request Exception', 'details' => $e->getMessage()], $e->statusCode);
-        } catch (\Exception $e) {
-            return response()->json(['message' => 'Internal server error during order creation' . $e->getMessage()], Response::HTTP_INTERNAL_SERVER_ERROR);
-        }
+        return successResponse(['formUrl' => $formUrl], Response::HTTP_CREATED);
     }
 
     /**
      * @param int $orderId
-     * @return JsonResponse
-     */
-    public function setSourceTokenById(int $orderId): JsonResponse
+     * @return Response
+     * @throws InvalidRequestException
+     * @throws InvalidTokenException
+     * @throws InvalidOrderStateException
+     * @throws Exception
+    */
+    public function setSourceTokenById(int $orderId): Response
     {
-        try {
-            $response = $this->orderService->setSourceToken(
-                config('payment.default_driver'),
-                $orderId,
-            );
-
-            return response()->json(['order' => $response->order], $response->httpCode);
-
-        } catch (InvalidRequestException $e) {
-            return response()->json(['message' => $e->getMessage()], $e->statusCode);
-        } catch (InvalidTokenException $e) {
-            return response()->json(['message' => $e->getMessage()], $e->statusCode);
-        } catch (InvalidOrderStateException $e) {
-            return response()->json(['message' => $e->getMessage()], $e->statusCode);
-        } catch (\Exception $exception) {
-            return response()->json(['message' => 'Internal server error during order creation' . $exception->getMessage()], Response::HTTP_INTERNAL_SERVER_ERROR);
-        }
+        $response = $this->orderService->setSourceToken(config('payment.default_driver'), $orderId);
+        return successResponse(['order' => $response->order]);
     }
 
     /**
      * @param int $orderId
-     * @return JsonResponse
+     * @return Response
+     * @throws InvalidRequestException
+     * @throws OrderNotFoundException
      */
-    public function getSimpleStatusById(int $orderId): JsonResponse
+    public function getSimpleStatusById(int $orderId): Response
     {
-        try {
-            $response = $this->orderService->getSimpleStatusByOrderId(
-                config('payment.default_driver'),
-                $orderId,
-            );
-
-            return response()->json(['order' => $response->order], $response->httpCode);
-        } catch (OrderNotFoundException $e) {
-            return response()->json(['message' => $e->getMessage()], Response::HTTP_NOT_FOUND);
-        } catch (InvalidRequestException $e) {
-            return response()->json(['message' => 'Invalid Request Exception', 'details' => $e->getMessage()], $e->statusCode);
-        } catch (\Exception) {
-            return response()->json(['message' => 'Internal server error during order creation'], Response::HTTP_INTERNAL_SERVER_ERROR);
-        }
+        $response = $this->orderService->getSimpleStatusByOrderId(config('payment.default_driver'), $orderId);
+        return successResponse(['order' => $response->order]);
     }
 }
