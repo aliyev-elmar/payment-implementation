@@ -15,6 +15,7 @@ class OrderRepository
     public function create(CreateOrderDto $dto): Order
     {
         return Order::query()->create([
+            'external_id' => $dto->id,
             'hpp_url' => $dto->hppUrl,
             'password' => Crypt::encryptString($dto->password),
             'status' => $dto->status,

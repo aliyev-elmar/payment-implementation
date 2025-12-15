@@ -6,7 +6,7 @@ use App\Enums\Payment\Order\OrderTypeRid;
 use App\Http\Requests\Order\StoreRequest;
 use App\Services\OrderService;
 use Illuminate\Http\{Response, JsonResponse};
-use App\Exceptions\{InvalidRequestException, OrderNotFoundException};
+use App\Exceptions\{InvalidOrderStateException, InvalidRequestException, InvalidTokenException, OrderNotFoundException};
 
 class OrderController extends Controller
 {
@@ -53,8 +53,14 @@ class OrderController extends Controller
 
             return response()->json(['order' => $response->order], $response->httpCode);
 
-        } catch (\Exception) {
-            return response()->json(['message' => 'Internal server error during order creation'], Response::HTTP_INTERNAL_SERVER_ERROR);
+        } catch (InvalidRequestException $e) {
+            return response()->json(['message' => $e->getMessage()], $e->statusCode);
+        } catch (InvalidTokenException $e) {
+            return response()->json(['message' => $e->getMessage()], $e->statusCode);
+        } catch (InvalidOrderStateException $e) {
+            return response()->json(['message' => $e->getMessage()], $e->statusCode);
+        } catch (\Exception $exception) {
+            return response()->json(['message' => 'Internal server error during order creation' . $exception->getMessage()], Response::HTTP_INTERNAL_SERVER_ERROR);
         }
     }
 

@@ -24,10 +24,7 @@ use App\DataTransferObjects\Payment\Order\SimpleStatus\{
     SimpleStatusResponseDto,
     SimpleStatusType,
 };
-use App\Exceptions\{
-    InvalidRequestException,
-    OrderNotFoundException,
-};
+use App\Exceptions\{InvalidOrderStateException, InvalidRequestException, OrderNotFoundException};
 
 class KapitalBankRepository implements IPaymentGateway
 {
@@ -166,9 +163,12 @@ class KapitalBankRepository implements IPaymentGateway
         );
 
         $response = $curlResponseDto->response;
-        $order = $response?->order;
-        $srcToken = $response?->srcToken;
-        $card = $srcToken?->card;
+        $order = self::getPropertyValueByObject($response, 'order');
+        $srcToken = self::getPropertyValueByObject($response, 'srcToken');
+        $card = self::getPropertyValueByObject($srcToken, 'card');
+
+        $errorCode = self::getPropertyValueByObject($response, 'errorCode') ?? '';
+        $errorDescription = self::getPropertyValueByObject($response, 'errorDescription') ?? '';
 
         $this->log("Payment/KapitalBank/SetSourceToken", [
             'response' => json_encode($response),
@@ -177,8 +177,16 @@ class KapitalBankRepository implements IPaymentGateway
             'curlErrno' => $curlResponseDto->curlErrno,
         ]);
 
-        if($curlResponseDto->httpCode === Response::HTTP_BAD_REQUEST) {
-            throw new InvalidRequestException(self::getPropertyValueByObject($response, 'errorDescription') ?? '');
+        if($curlResponseDto->httpCode === Response::HTTP_BAD_REQUEST && $errorCode === 'InvalidToken') {
+            throw new InvalidRequestException($errorDescription);
+        }
+
+        if($curlResponseDto->httpCode === Response::HTTP_BAD_REQUEST && $errorCode === 'InvalidRequest') {
+            throw new InvalidRequestException($errorDescription);
+        }
+
+        if($curlResponseDto->httpCode === Response::HTTP_BAD_REQUEST && $errorCode === 'InvalidOrderState') {
+            throw new InvalidOrderStateException($errorDescription);
         }
 
         $card = new SourceTokenCardDto(

@@ -22,4 +22,12 @@ return Application::configure(basePath: dirname(__DIR__))
         $exceptions->render(function (\App\Exceptions\InvalidRequestException $exception) {
             return response()->json(['message' => $exception->getMessage()], $exception->statusCode);
         });
+
+        $exceptions->render(function (\App\Exceptions\InvalidTokenException $exception) {
+            return response()->json(['message' => $exception->getMessage()], $exception->statusCode);
+        });
+
+        $exceptions->render(function (\App\Exceptions\InvalidOrderStateException $exception) {
+            return response()->json(['message' => $exception->getMessage()], $exception->statusCode);
+        });
     })->create();
