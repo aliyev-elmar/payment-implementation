@@ -5,6 +5,7 @@ namespace App\Repositories\PaymentGateways;
 use App\Contracts\IPaymentGateway;
 use App\Enums\Payment\Currency;
 use App\Enums\Payment\Language;
+use App\Enums\Payment\Order\InitiationEnvKind;
 use App\Enums\Payment\Order\OrderTypeRid;
 use App\Traits\Logger;
 use App\Services\CurlService;
@@ -157,7 +158,7 @@ class KapitalBankRepository implements IPaymentGateway
             $this->getHeader(),
             json_encode([
                 'order' => [
-                    'initiationEnvKind' => 'Server'
+                    'initiationEnvKind' => InitiationEnvKind::MIT->value,
                 ],
                 'token' => [
                     'storedId' => $orderId
