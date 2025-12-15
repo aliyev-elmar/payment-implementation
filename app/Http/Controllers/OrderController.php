@@ -43,15 +43,34 @@ class OrderController extends Controller
      * @param int $orderId
      * @return JsonResponse
      */
-    public function getSimpleStatusById(int $orderId): JsonResponse
+    public function setSourceTokenById(int $orderId): JsonResponse
     {
         try {
-            $simpleStatusResponse = $this->orderService->getSimpleStatusByOrderId(
+            $response = $this->orderService->setSourceToken(
                 config('payment.default_driver'),
                 $orderId,
             );
 
-            return response()->json(['order' => $simpleStatusResponse->order], $simpleStatusResponse->httpCode);
+            return response()->json(['order' => $response->order], $response->httpCode);
+
+        } catch (\Exception) {
+            return response()->json(['message' => 'Internal server error during order creation'], Response::HTTP_INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    /**
+     * @param int $orderId
+     * @return JsonResponse
+     */
+    public function getSimpleStatusById(int $orderId): JsonResponse
+    {
+        try {
+            $response = $this->orderService->getSimpleStatusByOrderId(
+                config('payment.default_driver'),
+                $orderId,
+            );
+
+            return response()->json(['order' => $response->order], $response->httpCode);
         } catch (OrderNotFoundException $e) {
             return response()->json(['message' => $e->getMessage()], Response::HTTP_NOT_FOUND);
         } catch (InvalidRequestException $e) {

@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Repositories\Payment;
+namespace App\Repositories\PaymentGateways;
 
 use App\Contracts\IPaymentGateway;
 use App\Enums\Payment\Currency;
@@ -67,11 +67,6 @@ class KapitalBankRepository implements IPaymentGateway
      * @var array
      */
     private array $hppCofCapturePurposes = ['Cit'];
-
-    /**
-     * @var string
-     */
-    private string $paymentGateway = 'Kapital Bank';
 
     /**
      * Set API URL && Authorization Basic
@@ -242,7 +237,7 @@ class KapitalBankRepository implements IPaymentGateway
         }
 
         if(is_null($order)) {
-            throw new OrderNotFoundException($this->paymentGateway);
+            throw new OrderNotFoundException();
         }
 
         $orderType = self::getPropertyValueByObject($order, 'type');

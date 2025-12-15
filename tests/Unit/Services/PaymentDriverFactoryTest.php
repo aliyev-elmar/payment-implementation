@@ -22,7 +22,7 @@ class PaymentDriverFactoryTest extends TestCase
     public function it_can_create_kapitalbank_driver_in_test_environment()
     {
         config([
-            'payment.map.kapitalbank' => \App\Repositories\Payment\KapitalBankRepository::class,
+            'payment.map.kapitalbank' => \App\Repositories\PaymentGateways\KapitalBankRepository::class,
             'payment.drivers.kapitalbank.test' => [
                 'api' => 'https://test-api.kapitalbank.az/api/v1/orders',
                 'hpp_redirect_url' => 'https://test.example.com/callback',
@@ -53,7 +53,7 @@ class PaymentDriverFactoryTest extends TestCase
     public function it_throws_exception_for_missing_configuration()
     {
         config([
-            'payment.map.kapitalbank' => \App\Repositories\Payment\KapitalBankRepository::class,
+            'payment.map.kapitalbank' => \App\Repositories\PaymentGateways\KapitalBankRepository::class,
             'payment.drivers.kapitalbank' => null
         ]);
 
@@ -67,7 +67,7 @@ class PaymentDriverFactoryTest extends TestCase
     public function it_caches_gateway_instances()
     {
         config([
-            'payment.map.kapitalbank' => \App\Repositories\Payment\KapitalBankRepository::class,
+            'payment.map.kapitalbank' => \App\Repositories\PaymentGateways\KapitalBankRepository::class,
             'payment.drivers.kapitalbank.test' => [
                 'api' => 'https://test-api.kapitalbank.az/api/v1/orders',
                 'hpp_redirect_url' => 'https://test.example.com/callback',
@@ -86,7 +86,7 @@ class PaymentDriverFactoryTest extends TestCase
     public function it_uses_production_config_in_production_environment()
     {
         config([
-            'payment.map.kapitalbank' => \App\Repositories\Payment\KapitalBankRepository::class,
+            'payment.map.kapitalbank' => \App\Repositories\PaymentGateways\KapitalBankRepository::class,
             'payment.drivers.kapitalbank.prod' => [
                 'api' => 'https://api.kapitalbank.az/api/v1/orders',
                 'hpp_redirect_url' => 'https://example.com/callback',

@@ -6,7 +6,7 @@ use App\Enums\Payment\Order\OrderTypeRid;
 use App\DataTransferObjects\Payment\Order\CreateOrderResponseDto;
 use App\DataTransferObjects\Payment\Order\SetSourceToken\SetSourceTokenResponseDto;
 use App\DataTransferObjects\Payment\Order\SimpleStatus\SimpleStatusResponseDto;
-use App\Exceptions\{OrderNotFoundException};
+use App\Exceptions\OrderNotFoundException;
 
 interface IPaymentGateway
 {

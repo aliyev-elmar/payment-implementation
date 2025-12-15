@@ -27,6 +27,6 @@ return [
     ],
 
     'map' => [
-        'kapitalbank' => \App\Repositories\Payment\KapitalBankRepository::class,
+        'kapitalbank' => \App\Repositories\PaymentGateways\KapitalBankRepository::class,
     ],
 ];

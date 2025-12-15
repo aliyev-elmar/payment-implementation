@@ -2,6 +2,8 @@
 
 namespace App\Services;
 
+use App\DataTransferObjects\Payment\Order\CreateOrderResponseDto;
+use App\DataTransferObjects\Payment\Order\SetSourceToken\SetSourceTokenResponseDto;
 use App\DataTransferObjects\Payment\Order\SimpleStatus\SimpleStatusResponseDto;
 use App\Enums\Payment\Order\OrderTypeRid;
 
@@ -19,13 +21,12 @@ class PaymentService
      * @param OrderTypeRid $orderTypeRid
      * @param int $amount
      * @param string $description
-     * @return string|null
+     * @return CreateOrderResponseDto
      */
-    public function createOrder(string $driver, OrderTypeRid $orderTypeRid, int $amount, string $description): ?string
+    public function createOrder(string $driver, OrderTypeRid $orderTypeRid, int $amount, string $description): CreateOrderResponseDto
     {
         $gateway = $this->paymentDriverFactory->driver($driver);
-        $response = $gateway->createOrder($orderTypeRid, $amount, $description);
-        return $response->formUrl;
+        return $gateway->createOrder($orderTypeRid, $amount, $description);
     }
 
     /**
@@ -37,5 +38,17 @@ class PaymentService
     {
         $gateway = $this->paymentDriverFactory->driver($driver);
         return $gateway->getSimpleStatusByOrderId($orderId);
+    }
+
+    /**
+     * @param string $driver
+     * @param int $orderId
+     * @param string $orderPassword
+     * @return SetSourceTokenResponseDto
+     */
+    public function setSourceToken(string $driver, int $orderId, string $orderPassword): SetSourceTokenResponseDto
+    {
+        $gateway = $this->paymentDriverFactory->driver($driver);
+        return $gateway->setSourceToken($orderId, $orderPassword);
     }
 }

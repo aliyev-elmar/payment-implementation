@@ -629,8 +629,8 @@ Update `config/payment.php`:
 ],
 
 'map' => [
-    'kapitalbank' => \App\Repositories\Payment\KapitalBankRepository::class,
-    'stripe' => \App\Repositories\Payment\StripeRepository::class,
+    'kapitalbank' => \App\Repositories\PaymentGateways\KapitalBankRepository::class,
+    'stripe' => \App\Repositories\PaymentGateways\StripeRepository::class,
 ],
 ```
 

@@ -12,12 +12,9 @@ class OrderNotFoundException extends RuntimeException
      */
     public int $statusCode;
 
-    /**
-     * @param string $paymentGateway
-     */
-    public function __construct(string $paymentGateway)
+    public function __construct()
     {
         $this->statusCode = Response::HTTP_NOT_FOUND;
-        parent::__construct("Order not found on $paymentGateway");
+        parent::__construct('Order not found');
     }
 }
