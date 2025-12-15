@@ -25,8 +25,8 @@ class OrderSourceToken extends Model
     /**
      * @return HasMany
      */
-    public function order_source_token_cards(): HasMany
+    public function source_token_cards(): HasMany
     {
-        $this->hasMany(OrderSourceTokenCard::class);
+        return $this->hasMany(OrderSourceTokenCard::class);
     }
 }
