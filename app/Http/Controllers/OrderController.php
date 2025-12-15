@@ -34,8 +34,8 @@ class OrderController extends Controller
             return response()->json(['formUrl' => $formUrl], Response::HTTP_CREATED);
         } catch (InvalidRequestException $e) {
             return response()->json(['message' => 'Invalid Request Exception', 'details' => $e->getMessage()], $e->statusCode);
-        } catch (\Exception) {
-            return response()->json(['message' => 'Internal server error during order creation'], Response::HTTP_INTERNAL_SERVER_ERROR);
+        } catch (\Exception $e) {
+            return response()->json(['message' => 'Internal server error during order creation' . $e->getMessage()], Response::HTTP_INTERNAL_SERVER_ERROR);
         }
     }
 

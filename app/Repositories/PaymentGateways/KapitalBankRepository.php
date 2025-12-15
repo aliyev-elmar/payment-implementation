@@ -123,8 +123,8 @@ class KapitalBankRepository implements IPaymentGateway
             'curlErrno' => $curlResponseDto->curlErrno,
         ]);
 
-        if($curlResponseDto->httpCode != Response::HTTP_BAD_REQUEST) {
-            throw new InvalidRequestException(self::getPropertyValueByObject($response, 'errorDescription'));
+        if($curlResponseDto->httpCode === Response::HTTP_BAD_REQUEST) {
+            throw new InvalidRequestException(self::getPropertyValueByObject($response, 'errorDescription') ?? '');
         }
 
         $order = new CreateOrderDto(
@@ -177,8 +177,8 @@ class KapitalBankRepository implements IPaymentGateway
             'curlErrno' => $curlResponseDto->curlErrno,
         ]);
 
-        if($curlResponseDto->httpCode != Response::HTTP_BAD_REQUEST) {
-            throw new InvalidRequestException(self::getPropertyValueByObject($response, 'errorDescription'));
+        if($curlResponseDto->httpCode === Response::HTTP_BAD_REQUEST) {
+            throw new InvalidRequestException(self::getPropertyValueByObject($response, 'errorDescription') ?? '');
         }
 
         $card = new SourceTokenCardDto(
@@ -232,8 +232,8 @@ class KapitalBankRepository implements IPaymentGateway
             'curlErrno' => $curlResponseDto->curlErrno,
         ]);
 
-        if($curlResponseDto->httpCode != Response::HTTP_BAD_REQUEST) {
-            throw new InvalidRequestException(self::getPropertyValueByObject($response, 'errorDescription'));
+        if($curlResponseDto->httpCode === Response::HTTP_BAD_REQUEST) {
+            throw new InvalidRequestException(self::getPropertyValueByObject($response, 'errorDescription') ?? '');
         }
 
         if(is_null($order)) {
