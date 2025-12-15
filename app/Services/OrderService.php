@@ -71,6 +71,11 @@ class OrderService
      */
     public function getSimpleStatusByOrderId(string $driver, int $orderId): SimpleStatusResponseDto
     {
-        return $this->paymentService->getSimpleStatusByOrderId($driver, $orderId);
+        $response = $this->paymentService->getSimpleStatusByOrderId($driver, $orderId);
+
+        $order = $this->orderRepository->getByExternalId($orderId);
+        $this->orderRepository->updateStatus($order, $response->order->status);
+
+        return $response;
     }
 }

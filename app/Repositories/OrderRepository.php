@@ -32,4 +32,17 @@ class OrderRepository
     {
         return Order::query()->where('external_id', $externalId)->first();
     }
+
+    /**
+     * @param Order $order
+     * @param string $status
+     * @return Order
+     */
+    public function updateStatus(Order $order, string $status): Order
+    {
+        $order->update(['status' => $status]);
+
+        $order->refresh();
+        return $order;
+    }
 }
