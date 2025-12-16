@@ -7,12 +7,12 @@ use App\DataTransferObjects\Dto;
 readonly class SourceTokenCardDto extends Dto
 {
     /**
-     * @param int|null $expiration
-     * @param string|null $brand
+     * @param int $expiration
+     * @param string $brand
      */
     public function __construct(
-        public ?int $expiration,
-        public ?string $brand,
+        public int $expiration,
+        public string $brand,
     )
     {
     }

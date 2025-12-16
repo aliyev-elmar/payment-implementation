@@ -81,10 +81,8 @@ class OrderService
             $response = $this->paymentService->setSourceToken($driver, $orderId, Crypt::decryptString($order->password));
             $srcToken = $response->order->srcToken;
 
-            Concurrency::run([
-                'task1' => fn() => $this->orderSourceTokenRepository->create($orderId, $srcToken),
-                'task2' => fn() => $this->orderSourceTokenCardRepository->create($srcToken->id, $srcToken->card),
-            ]);
+            $orderSourceToken = $this->orderSourceTokenRepository->create($orderId, $srcToken);
+            $this->orderSourceTokenCardRepository->create($orderSourceToken->id, $srcToken->card);
 
             DB::commit();
             return $response;
