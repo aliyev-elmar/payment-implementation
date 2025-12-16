@@ -1,0 +1,66 @@
+services:
+    app:
+        build:
+            context: .
+            dockerfile: Dockerfile
+        container_name: payment-app
+        restart: unless-stopped
+        working_dir: /var/www
+        volumes:
+            - ./:/var/www
+        networks:
+            - payment-network
+
+    db:
+      image: mysql:8.0
+      container_name: payment-db
+      restart: unless-stopped
+      command: --default-authentication-plugin=mysql_native_password
+      environment:
+        MYSQL_DATABASE: payment_implementation_db
+        MYSQL_ROOT_PASSWORD: root
+        MYSQL_PASSWORD: secret
+        MYSQL_USER: payment_user
+      ports:
+        - "3307:3306"
+      volumes:
+        - dbdata:/var/lib/mysql
+      networks:
+        - payment-network
+
+    phpmyadmin:
+      image: phpmyadmin/phpmyadmin
+      container_name: payment-phpmyadmin
+      restart: unless-stopped
+      environment:
+        PMA_HOST: db
+        PMA_PORT: 3306
+        PMA_USER: payment_user
+        PMA_PASSWORD: secret
+        MYSQL_ROOT_PASSWORD: root
+      ports:
+        - "8081:80"
+      networks:
+        - payment-network
+      depends_on:
+        - db
+
+    nginx:
+        image: nginx:alpine
+        container_name: payment-nginx
+        restart: unless-stopped
+        ports:
+            - "8080:80"
+        volumes:
+            - ./:/var/www
+            - ./docker/nginx:/etc/nginx/conf.d
+        networks:
+            - payment-network
+
+networks:
+    payment-network:
+        driver: bridge
+
+volumes:
+    dbdata:
+        driver: local
