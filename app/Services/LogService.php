@@ -1,10 +1,10 @@
 <?php
 
-namespace App\Traits;
+namespace App\Services;
 
 use Illuminate\Support\Facades\File;
 
-trait Logger
+class LogService
 {
     /**
      * @param string $folder

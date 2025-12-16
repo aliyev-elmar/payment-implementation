@@ -5,7 +5,7 @@ namespace App\Http\Controllers;
 use App\Enums\Payment\Order\OrderTypeRid;
 use App\Services\OrderService;
 use App\Http\Requests\Order\StoreRequest;
-use Illuminate\Http\Response;
+use Illuminate\Http\{Response, JsonResponse};
 use App\Exceptions\{
     InvalidRequestException,
     InvalidTokenException,
@@ -25,10 +25,10 @@ class OrderController extends Controller
 
     /**
      * @param StoreRequest $request
-     * @return Response
+     * @return JsonResponse
      * @throws InvalidRequestException
      */
-    public function store(StoreRequest $request): Response
+    public function store(StoreRequest $request): JsonResponse
     {
         $formUrl = $this->orderService->create(
             config('payment.default_driver'),
@@ -37,32 +37,32 @@ class OrderController extends Controller
             $request->get('description', 'description for create order process'),
         );
 
-        return successResponse(['formUrl' => $formUrl], Response::HTTP_CREATED);
+        return response()->json(['formUrl' => $formUrl], Response::HTTP_CREATED);
     }
 
     /**
      * @param int $orderId
-     * @return Response
+     * @return JsonResponse
      * @throws InvalidRequestException
      * @throws InvalidTokenException
      * @throws InvalidOrderStateException
      * @throws Exception
     */
-    public function setSourceTokenById(int $orderId): Response
+    public function setSourceTokenById(int $orderId): JsonResponse
     {
         $response = $this->orderService->setSourceToken(config('payment.default_driver'), $orderId);
-        return successResponse(['order' => $response->order]);
+        return response()->json(['order' => $response->order]);
     }
 
     /**
      * @param int $orderId
-     * @return Response
+     * @return JsonResponse
      * @throws InvalidRequestException
      * @throws OrderNotFoundException
      */
-    public function getSimpleStatusById(int $orderId): Response
+    public function getSimpleStatusById(int $orderId): JsonResponse
     {
         $response = $this->orderService->getSimpleStatusByOrderId(config('payment.default_driver'), $orderId);
-        return successResponse(['order' => $response->order]);
+        return response()->json(['order' => $response->order]);
     }
 }

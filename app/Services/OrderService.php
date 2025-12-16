@@ -43,6 +43,7 @@ class OrderService
      * @param string $description
      * @return string|null
      * @throws InvalidRequestException
+     * @throws Exception
      */
     public function create(string $driver, OrderTypeRid $orderTypeRid, int $amount, string $description): ?string
     {
@@ -53,12 +54,9 @@ class OrderService
 
             DB::commit();
             return $response->formUrl;
-        } catch (InvalidRequestException $e) {
+        } catch (Exception $e) {
             DB::rollBack();
-            throw errorResponse($e->getMessage(), $e->statusCode);
-        } catch (Exception) {
-            DB::rollBack();
-            throw errorResponse();
+            throw $e;
         }
     }
 
@@ -86,12 +84,9 @@ class OrderService
 
             DB::commit();
             return $response;
-        } catch (InvalidRequestException|InvalidTokenException|InvalidOrderStateException $e) {
+        } catch (Exception $e) {
             DB::rollBack();
-            throw errorResponse($e->getMessage(), $e->statusCode);
-        } catch (Exception) {
-            DB::rollBack();
-            throw errorResponse();
+            throw $e;
         }
     }
 
@@ -113,12 +108,9 @@ class OrderService
 
             $this->orderRepository->updateStatus($order, $response->order->status);
             return $response;
-        } catch (InvalidRequestException|OrderNotFoundException $e) {
+        } catch (Exception $e) {
             DB::rollBack();
-            throw errorResponse($e->getMessage(), $e->statusCode);
-        } catch (Exception) {
-            DB::rollBack();
-            throw errorResponse();
+            throw $e;
         }
     }
 }
