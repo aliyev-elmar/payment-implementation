@@ -5,7 +5,7 @@ namespace App\Services;
 use App\Enums\Payment\Order\OrderTypeRid;
 use App\DataTransferObjects\Payment\Order\SimpleStatus\SimpleStatusResponseDto;
 use App\DataTransferObjects\Payment\Order\SetSourceToken\SetSourceTokenResponseDto;
-use Illuminate\Support\Facades\{DB, Crypt};
+use Illuminate\Support\Facades\{Concurrency, DB, Crypt};
 use App\Repositories\{
     OrderRepository,
     OrderSourceTokenRepository,
@@ -79,10 +79,12 @@ class OrderService
             if(!$order) throw new OrderNotFoundException();
 
             $response = $this->paymentService->setSourceToken($driver, $orderId, Crypt::decryptString($order->password));
-
             $srcToken = $response->order->srcToken;
-            $this->orderSourceTokenRepository->create($orderId, $srcToken);
-            $this->orderSourceTokenCardRepository->create($srcToken->id, $srcToken->card);
+
+            Concurrency::run([
+                'task1' => fn() => $this->orderSourceTokenRepository->create($orderId, $srcToken),
+                'task2' => fn() => $this->orderSourceTokenCardRepository->create($srcToken->id, $srcToken->card),
+            ]);
 
             DB::commit();
             return $response;
