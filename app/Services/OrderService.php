@@ -7,6 +7,7 @@ use App\Enums\Payment\Order\OrderTypeRid;
 use App\DataTransferObjects\Payment\Order\SimpleStatus\SimpleStatusResponseDto;
 use App\DataTransferObjects\Payment\Order\SetSourceToken\SetSourceTokenResponseDto;
 use Illuminate\Support\Facades\{DB, Crypt};
+use Illuminate\Http\Response;
 use App\Repositories\{
     OrderRepository,
     OrderSourceTokenRepository,
@@ -81,7 +82,8 @@ class OrderService
 
             if ($order->status !== $successStatus) {
                 throw new InvalidOrderStateException(
-                    "Cannot set source token. Order status is '{$order->status}', expected {$successStatus}"
+                    "Cannot set source token. Order status is '{$order->status}', expected {$successStatus}",
+                    Response::HTTP_PAYMENT_REQUIRED,
                 );
             }
 

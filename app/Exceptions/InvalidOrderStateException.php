@@ -14,10 +14,11 @@ class InvalidOrderStateException extends RuntimeException
 
     /**
      * @param string $message
+     * @param int $statusCode
      */
-    public function __construct(string $message)
+    public function __construct(string $message, int $statusCode = Response::HTTP_BAD_REQUEST)
     {
-        $this->statusCode = Response::HTTP_BAD_REQUEST;
+        $this->statusCode = $statusCode;
         parent::__construct("errorCode: Invalid Order State, errorDescription: {$message}");
     }
 }
