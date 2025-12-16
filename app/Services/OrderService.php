@@ -5,7 +5,7 @@ namespace App\Services;
 use App\Enums\Payment\Order\OrderTypeRid;
 use App\DataTransferObjects\Payment\Order\SimpleStatus\SimpleStatusResponseDto;
 use App\DataTransferObjects\Payment\Order\SetSourceToken\SetSourceTokenResponseDto;
-use Illuminate\Support\Facades\{Concurrency, DB, Crypt};
+use Illuminate\Support\Facades\{DB, Crypt};
 use App\Repositories\{
     OrderRepository,
     OrderSourceTokenRepository,
