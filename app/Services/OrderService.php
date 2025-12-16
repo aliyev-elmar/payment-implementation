@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Enums\Payment\Order\OrderStatus;
 use App\Enums\Payment\Order\OrderTypeRid;
 use App\DataTransferObjects\Payment\Order\SimpleStatus\SimpleStatusResponseDto;
 use App\DataTransferObjects\Payment\Order\SetSourceToken\SetSourceTokenResponseDto;
@@ -71,10 +72,18 @@ class OrderService
      */
     public function setSourceToken(string $driver, int $orderId): SetSourceTokenResponseDto
     {
+        $successStatus = OrderStatus::FULLY_PAID->value;
+
         DB::beginTransaction();
         try {
             $order = $this->orderRepository->getByExternalId($orderId);
             if(!$order) throw new OrderNotFoundException();
+
+            if ($order->status !== $successStatus) {
+                throw new InvalidOrderStateException(
+                    "Cannot set source token. Order status is '{$order->status}', expected {$successStatus}"
+                );
+            }
 
             $response = $this->paymentService->setSourceToken($driver, $orderId, Crypt::decryptString($order->password));
             $srcToken = $response->order->srcToken;
