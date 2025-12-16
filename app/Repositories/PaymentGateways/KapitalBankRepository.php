@@ -3,7 +3,6 @@
 namespace App\Repositories\PaymentGateways;
 
 use App\Contracts\IPaymentGateway;
-use App\Traits\InteractsWithObjects;
 use Illuminate\Http\Response;
 use App\Enums\Payment\{Currency, Language, ErrorCode};
 use App\Enums\Payment\Order\{InitiationEnvKind, OrderTypeRid};
@@ -32,8 +31,6 @@ use App\Exceptions\{
 
 class KapitalBankRepository implements IPaymentGateway
 {
-    use InteractsWithObjects;
-
     /**
      * @var string
      */
@@ -118,8 +115,8 @@ class KapitalBankRepository implements IPaymentGateway
         $response = $curlResponseDto->response;
         $order = $response?->order;
 
-        $errorCode = static::getPropertyValueByObject($response, 'errorCode') ?? '';
-        $errorDescription = static::getPropertyValueByObject($response, 'errorDescription') ?? '';
+        $errorCode = object_get($response, 'errorCode',  '');
+        $errorDescription = object_get($response, 'errorDescription', '');
 
         $this->logService->log("Payment/KapitalBank/CreateOrder/{$orderTypeRid->value}", [
             'response' => json_encode($response),
@@ -133,12 +130,12 @@ class KapitalBankRepository implements IPaymentGateway
         }
 
         $order = new CreateOrderDto(
-            id: static::getPropertyValueByObject($order, 'id'),
-            hppUrl: static::getPropertyValueByObject($order, 'hppUrl'),
-            password: static::getPropertyValueByObject($order, 'password'),
-            status: static::getPropertyValueByObject($order, 'status'),
-            cvv2AuthStatus: static::getPropertyValueByObject($order, 'cvv2AuthStatus'),
-            secret: static::getPropertyValueByObject($order, 'secret'),
+            id: object_get($order, 'id'),
+            hppUrl: object_get($order, 'hppUrl'),
+            password: object_get($order, 'password'),
+            status: object_get($order, 'status'),
+            cvv2AuthStatus: object_get($order, 'cvv2AuthStatus'),
+            secret: object_get($order, 'secret'),
         );
 
         return new CreateOrderResponseDto(
@@ -174,12 +171,12 @@ class KapitalBankRepository implements IPaymentGateway
         );
 
         $response = $curlResponseDto->response;
-        $order = static::getPropertyValueByObject($response, 'order');
-        $srcToken = static::getPropertyValueByObject($response, 'srcToken');
-        $card = static::getPropertyValueByObject($srcToken, 'card');
+        $order = object_get($response, 'order');
+        $srcToken = object_get($response, 'srcToken');
+        $card = object_get($srcToken, 'card');
 
-        $errorCode = static::getPropertyValueByObject($response, 'errorCode') ?? '';
-        $errorDescription = static::getPropertyValueByObject($response, 'errorDescription') ?? '';
+        $errorCode = object_get($response, 'errorCode', '');
+        $errorDescription = object_get($response, 'errorDescription', '');
 
         $this->logService->log("Payment/KapitalBank/SetSourceToken", [
             'response' => json_encode($response),
@@ -201,26 +198,26 @@ class KapitalBankRepository implements IPaymentGateway
         }
 
         $card = new SourceTokenCardDto(
-            expiration: static::getPropertyValueByObject($card, 'expiration'),
-            brand: static::getPropertyValueByObject($card, 'brand'),
+            expiration: object_get($card, 'expiration'),
+            brand: object_get($card, 'brand'),
         );
 
         $srcToken = new SourceTokenDto(
-            id: static::getPropertyValueByObject($srcToken, 'id'),
-            paymentMethod: static::getPropertyValueByObject($srcToken, 'paymentMethod'),
-            role: static::getPropertyValueByObject($srcToken, 'role'),
-            status: static::getPropertyValueByObject($srcToken, 'status'),
-            regTime: static::getPropertyValueByObject($srcToken, 'regTime'),
-            displayName: static::getPropertyValueByObject($srcToken, 'displayName'),
+            id: object_get($srcToken, 'id'),
+            paymentMethod: object_get($srcToken, 'paymentMethod'),
+            role: object_get($srcToken, 'role'),
+            status: object_get($srcToken, 'status'),
+            regTime: object_get($srcToken, 'regTime'),
+            displayName: object_get($srcToken, 'displayName'),
             card: $card,
         );
 
         $order = new SetSourceTokenDto(
-            status: static::getPropertyValueByObject($order, 'status'),
-            cvv2AuthStatus: static::getPropertyValueByObject($order, 'cvv2AuthStatus'),
-            tdsV1AuthStatus: static::getPropertyValueByObject($order, 'tdsV1AuthStatus'),
-            tdsV2AuthStatus: static::getPropertyValueByObject($order, 'tdsV2AuthStatus'),
-            otpAutStatus: static::getPropertyValueByObject($order, 'otpAutStatus'),
+            status: object_get($order, 'status'),
+            cvv2AuthStatus: object_get($order, 'cvv2AuthStatus'),
+            tdsV1AuthStatus: object_get($order, 'tdsV1AuthStatus'),
+            tdsV2AuthStatus: object_get($order, 'tdsV2AuthStatus'),
+            otpAutStatus: object_get($order, 'otpAutStatus'),
             srcToken: $srcToken,
         );
 
@@ -244,8 +241,8 @@ class KapitalBankRepository implements IPaymentGateway
         $response = $curlResponseDto->response;
         $order = $response?->order;
 
-        $errorCode = static::getPropertyValueByObject($response, 'errorCode') ?? '';
-        $errorDescription = static::getPropertyValueByObject($response, 'errorDescription') ?? '';
+        $errorCode = object_get($response, 'errorCode', '');
+        $errorDescription = object_get($response, 'errorDescription', '');
 
         $this->logService->log("Payment/KapitalBank/GetSimpleStatus", [
             'response' => json_encode($response),
@@ -262,23 +259,23 @@ class KapitalBankRepository implements IPaymentGateway
             throw new OrderNotFoundException();
         }
 
-        $orderType = static::getPropertyValueByObject($order, 'type');
-        $orderTypeTitle = static::getPropertyValueByObject($orderType, 'title');
+        $orderType = object_get($order, 'type');
+        $orderTypeTitle = object_get($orderType, 'title');
 
         $simpleStatusType = new SimpleStatusType(
             title: $orderTypeTitle,
         );
 
         $simpleStatus = new SimpleStatusDto(
-            id: static::getPropertyValueByObject($order, 'id'),
-            typeRid: static::getPropertyValueByObject($order, 'typeRid'),
-            status: static::getPropertyValueByObject($order, 'status'),
-            prevStatus: static::getPropertyValueByObject($order, 'prevStatus'),
-            lastStatusLogin: static::getPropertyValueByObject($order, 'lastStatusLogin'),
-            amount: static::getPropertyValueByObject($order, 'amount'),
-            currency: static::getPropertyValueByObject($order, 'currency'),
-            createTime: static::getPropertyValueByObject($order, 'createTime'),
-            finishTime: static::getPropertyValueByObject($order, 'finishTime'),
+            id: object_get($order, 'id'),
+            typeRid: object_get($order, 'typeRid'),
+            status: object_get($order, 'status'),
+            prevStatus: object_get($order, 'prevStatus'),
+            lastStatusLogin: object_get($order, 'lastStatusLogin'),
+            amount: object_get($order, 'amount'),
+            currency: object_get($order, 'currency'),
+            createTime: object_get($order, 'createTime'),
+            finishTime: object_get($order, 'finishTime'),
             type: $simpleStatusType,
         );
 
