@@ -40,9 +40,8 @@ class OrderRepository
      */
     public function updateStatus(Order $order, string $status): Order
     {
-        $order->update(['status' => $status]);
-
-        $order->refresh();
+        $order->status = $status;
+        $order->save();
         return $order;
     }
 }

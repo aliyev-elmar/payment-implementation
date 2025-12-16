@@ -19,13 +19,12 @@ class PaymentDriverFactory
     public function driver(string $driver): IPaymentGateway
     {
         $appEnv = app()->environment('production') ? 'prod' : 'test';
-        $gateway = $this->createDriverInstance($driver, $appEnv);
 
         if (isset($this->gateways[$driver][$appEnv])) {
             return $this->gateways[$driver][$appEnv];
         }
 
-        return $this->gateways[$driver][$appEnv] = $gateway;
+        return $this->gateways[$driver][$appEnv] = $this->createDriverInstance($driver, $appEnv);
     }
 
     /**

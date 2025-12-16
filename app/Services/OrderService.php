@@ -79,7 +79,7 @@ class OrderService
             $response = $this->paymentService->setSourceToken($driver, $orderId, Crypt::decryptString($order->password));
             $srcToken = $response->order->srcToken;
 
-            $orderSourceToken = $this->orderSourceTokenRepository->create($orderId, $srcToken);
+            $orderSourceToken = $this->orderSourceTokenRepository->create($order->id, $srcToken);
             $this->orderSourceTokenCardRepository->create($orderSourceToken->id, $srcToken->card);
 
             DB::commit();
@@ -107,6 +107,8 @@ class OrderService
             if(!$order) throw new OrderNotFoundException();
 
             $this->orderRepository->updateStatus($order, $response->order->status);
+
+            DB::commit();
             return $response;
         } catch (Exception $e) {
             DB::rollBack();
