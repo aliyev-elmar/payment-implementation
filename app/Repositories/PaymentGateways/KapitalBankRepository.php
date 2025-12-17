@@ -2,7 +2,6 @@
 
 namespace App\Repositories\PaymentGateways;
 
-use App\Contracts\IPaymentGateway;
 use Illuminate\Http\Response;
 use App\Enums\Payment\{Currency, Language, ErrorCode};
 use App\Enums\Payment\Order\{InitiationEnvKind, OrderTypeRid};
@@ -29,7 +28,7 @@ use App\Exceptions\{
     OrderNotFoundException,
 };
 
-class KapitalBankRepository implements IPaymentGateway
+class KapitalBankRepository extends PaymentGatewayRepository
 {
     /**
      * @var string
