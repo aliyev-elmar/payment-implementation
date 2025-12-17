@@ -2,9 +2,9 @@
 
 namespace App\Enums\Payment\Order;
 
-/* order.initiationEnvKind Sifarişin başlanğıc mühit növünü göstərir */
+/* Indicates the environment kind of the order initiation */
 enum InitiationEnvKind: string
 {
-    case MIT = 'Server'; // MIT/Təkrar əməliyyatlar üçün
-    case CIT = 'Browser'; // CIT əməliyyatları üçün
+    case MIT = 'Server'; // For MIT/Recurring operations
+    case CIT = 'Browser'; // For CIT operations
 }

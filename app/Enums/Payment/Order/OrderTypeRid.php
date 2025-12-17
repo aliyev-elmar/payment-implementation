@@ -2,12 +2,12 @@
 
 namespace App\Enums\Payment\Order;
 
-/* Sifarişin növü */
+/* Type of the order */
 enum OrderTypeRid: string
 {
-    case Purchase = 'Order_SMS'; // Alış əməliyyatları üçün
-    case PreAuth = 'Order_DMS'; // Preauthorization əməliyyatları üçün
-    case RepeatPurchase = 'Order_REC'; // Təkrar Alış əməliyyatları üçün (saxlanılan kart ilə əməliyyatlar)
-    case RepeatPreAuth = 'DMSN3D'; // Təkrar Preauthorization əməliyyatları üçün (saxlanılan kart ilə əməliyyatlar)
-    case CardToCard = 'OCT'; // Kartdan Karta əməliyyatlar üçün (Sifariş Kredit Əməliyyatı)
+    case Purchase = 'Order_SMS'; // For purchase operations
+    case PreAuth = 'Order_DMS'; // For Preauthorization operations
+    case RepeatPurchase = 'Order_REC'; // For recurring Purchase operations (transactions with saved card)
+    case RepeatPreAuth = 'DMSN3D'; // For recurring Preauthorization operations (transactions with saved card)
+    case CardToCard = 'OCT'; // For Account-to-Card operations (Order Credit Transaction)
 }
