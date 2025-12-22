@@ -107,6 +107,7 @@ class OrderService
      * @return SimpleStatusResponseDto
      * @throws InvalidRequestException
      * @throws OrderNotFoundException
+     * @throws Exception
      */
     public function getSimpleStatusByOrderId(string $driver, int $orderId): SimpleStatusResponseDto
     {

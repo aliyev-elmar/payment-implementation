@@ -2,6 +2,7 @@
 
 namespace App\Repositories\PaymentGateways;
 
+use App\Contracts\IPaymentGateway;
 use Illuminate\Http\Response;
 use App\Enums\Payment\{Currency, Language, ErrorCode};
 use App\Enums\Payment\Order\{InitiationEnvKind, OrderTypeRid};
@@ -28,7 +29,7 @@ use App\Exceptions\{
     OrderNotFoundException,
 };
 
-class KapitalBankRepository extends PaymentGatewayRepository
+class KapitalBankRepository implements IPaymentGateway
 {
     /**
      * @var string
@@ -96,7 +97,7 @@ class KapitalBankRepository extends PaymentGatewayRepository
     public function createOrder(OrderTypeRid $orderTypeRid, int $amount, string $description): CreateOrderResponseDto
     {
         $curlResponseDto = $this->curlService->postRequest(
-            $this->apiUrl,
+            "{$this->apiUrl}/order",
             $this->getHeader(),
             json_encode([
                 'order' => [
@@ -157,7 +158,7 @@ class KapitalBankRepository extends PaymentGatewayRepository
     public function setSourceToken(int $orderId, string $orderPassword): SetSourceTokenResponseDto
     {
         $curlResponseDto = $this->curlService->postRequest(
-            $this->apiUrl . $orderId . "/set-src-token?password=$orderPassword",
+            "{$this->apiUrl}/order/{$orderId}/set-src-token?password={$orderPassword}",
             $this->getHeader(),
             json_encode([
                 'order' => [
@@ -236,7 +237,11 @@ class KapitalBankRepository extends PaymentGatewayRepository
      */
     public function getSimpleStatusByOrderId(int $orderId): SimpleStatusResponseDto
     {
-        $curlResponseDto = $this->curlService->getRequest($this->apiUrl . $orderId, $this->getHeader());
+        $curlResponseDto = $this->curlService->getRequest(
+            "{$this->apiUrl}/order/{$orderId}",
+            $this->getHeader(),
+        );
+
         $response = $curlResponseDto->response;
         $order = $response?->order;
 

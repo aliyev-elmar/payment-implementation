@@ -19,6 +19,7 @@ class OrderController extends Controller
     /**
      * @param StoreRequest $request
      * @return JsonResponse
+     * @throws \Exception
      */
     public function store(StoreRequest $request): JsonResponse
     {
@@ -35,6 +36,7 @@ class OrderController extends Controller
     /**
      * @param int $orderId
      * @return JsonResponse
+     * @throws \Exception
      */
     public function setSourceTokenById(int $orderId): JsonResponse
     {
@@ -45,6 +47,7 @@ class OrderController extends Controller
     /**
      * @param int $orderId
      * @return JsonResponse
+     * @throws \Exception
      */
     public function getSimpleStatusById(int $orderId): JsonResponse
     {
