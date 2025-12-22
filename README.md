@@ -152,7 +152,6 @@ class PaymentService {
 * ✅ **Transaction Management** - Atomic database operations with proper rollback
 * ✅ **Exception Handling** - Custom exceptions with global handler integration
 * ✅ **Docker Support** - Complete containerized development environment
-* ✅ **Laravel Pulse** - Real-time application monitoring
 * ✅ **Comprehensive Logging** - Automatic logging of all payment operations
 
 ## 🔄 Operation Flow
@@ -759,7 +758,6 @@ This project includes a complete Docker configuration for easy local development
 - **MySQL 8.0** database
 - **Nginx** web server
 - **phpMyAdmin** for database management
-- **Laravel Pulse** for real-time monitoring
 
 ### Quick Start with Docker
 
@@ -835,7 +833,6 @@ KAPITAL_BANK_TEST_HPP_REDIRECT_URL=http://127.0.0.1:8000
 #### 7. Access the application
 
 - **Laravel Application**: http://localhost:8080
-- **Laravel Pulse**: http://localhost:8080/pulse
 - **phpMyAdmin**: http://localhost:8081
     - Username: `root` or `payment_user`
     - Password: `root` or `secret`
