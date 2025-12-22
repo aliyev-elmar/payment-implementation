@@ -653,10 +653,10 @@ KAPITAL_BANK_PROD_PASS=your_prod_password
 KAPITAL_BANK_PROD_HPP_REDIRECT_URL=https://yoursite.com/payment/callback
 
 # Kapital Bank - Test
-KAPITAL_BANK_TEST_API=https://test-api.kapitalbank.az/api/v1/orders/
-KAPITAL_BANK_TEST_USER=your_test_username
-KAPITAL_BANK_TEST_PASS=your_test_password
-KAPITAL_BANK_TEST_HPP_REDIRECT_URL=https://test.yoursite.com/payment/callback
+KAPITAL_BANK_TEST_API=https://txpgtst.kapitalbank.az/api
+KAPITAL_BANK_TEST_USER=TerminalSys/kapital
+KAPITAL_BANK_TEST_PASS=kapital123
+KAPITAL_BANK_TEST_HPP_REDIRECT_URL=http://127.0.0.1:8000
 ```
 
 #### 7. Access the application
