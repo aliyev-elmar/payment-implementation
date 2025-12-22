@@ -155,6 +155,179 @@ class PaymentService {
 * ✅ **Laravel Pulse** - Real-time application monitoring
 * ✅ **Comprehensive Logging** - Automatic logging of all payment operations
 
+## 🔄 Operation Flow
+
+### Transaction Flow (Common Payment)
+
+The payment process follows a three-step flow:
+
+#### **Step 1: Create Order**
+Send a create order request to initialize the payment transaction.
+
+**Endpoint:** `POST /api/orders`
+
+**Request:**
+```json
+{
+  "amount": 10000,
+  "description": "Payment for Order #12345"
+}
+```
+
+**Response (201 Created):**
+```json
+{
+  "formUrl": "https://hpp.kapitalbank.az?id=ORDER_ID&password=ORDER_PASSWORD"
+}
+```
+
+If the response is successful, proceed to Step 2.
+
+#### **Step 2: Redirect to Payment Page**
+Redirect the user to the payment provider's hosted payment page (HPP) using the URL from the create order response.
+
+**URL Format:**
+```
+{{formUrl}}
+```
+
+Example:
+```
+https://hpp.kapitalbank.az?id=12345&password=abc123xyz
+```
+
+The user will complete the payment on the payment provider's secure page.
+
+#### **Step 3: Handle Payment Callback**
+After the transaction is completed on the payment provider's side, the user will be redirected to your callback URL with transaction details.
+
+**Callback URL Format:**
+```
+{{your_callback_url}}?ID=12345&STATUS=FullyPaid
+```
+
+**Important Note:** The `STATUS` parameter value in the callback may be temporary. You **must** verify the final transaction status using the Transaction Details request.
+
+**Verify Transaction Status:**
+
+**Endpoint:** `GET /api/orders/{orderId}/simple-status`
+
+**Example:**
+```bash
+GET /api/orders/12345/simple-status
+```
+
+**Response (200 OK):**
+```json
+{
+  "order": {
+    "id": 12345,
+    "typeRid": "Order_SMS",
+    "status": "FullyPaid",
+    "prevStatus": "Preparing",
+    "lastStatusLogin": "2025-12-15T14:30:00Z",
+    "amount": 10000,
+    "currency": "AZN",
+    "createTime": "2025-12-15T14:25:00Z",
+    "finishTime": "2025-12-15T14:30:00Z",
+    "type": {
+      "title": "Purchase"
+    }
+  }
+}
+```
+
+### Operation Flow Diagram
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│                     Your Application                         │
+└─────────────────────────────────────────────────────────────┘
+                              │
+                              │ 1. POST /api/orders
+                              │    { amount, description }
+                              ▼
+┌─────────────────────────────────────────────────────────────┐
+│                    Payment API Service                       │
+│                 (Your Laravel Backend)                       │
+└─────────────────────────────────────────────────────────────┘
+                              │
+                              │ Response: { formUrl }
+                              ▼
+┌─────────────────────────────────────────────────────────────┐
+│                     Your Application                         │
+│              2. Redirect user to formUrl                     │
+└─────────────────────────────────────────────────────────────┘
+                              │
+                              ▼
+┌─────────────────────────────────────────────────────────────┐
+│              Payment Provider (HPP Page)                     │
+│         User enters card details and confirms                │
+└─────────────────────────────────────────────────────────────┘
+                              │
+                              │ 3. Redirect after payment
+                              │    {{callback_url}}?ID=xxx&STATUS=yyy
+                              ▼
+┌─────────────────────────────────────────────────────────────┐
+│                  Your Callback Handler                       │
+└─────────────────────────────────────────────────────────────┘
+                              │
+                              │ 4. GET /api/orders/{id}/simple-status
+                              │    (Verify actual status)
+                              ▼
+┌─────────────────────────────────────────────────────────────┐
+│                    Payment API Service                       │
+│                 (Your Laravel Backend)                       │
+└─────────────────────────────────────────────────────────────┘
+                              │
+                              │ Response: { order: {...} }
+                              ▼
+┌─────────────────────────────────────────────────────────────┐
+│                  Your Callback Handler                       │
+│            Process based on verified status                  │
+│        (FullyPaid, Declined, Expired, etc.)                  │
+└─────────────────────────────────────────────────────────────┘
+```
+
+### Integration Example
+
+```php
+// Step 1: Create Order
+$response = Http::post('https://your-api.com/api/orders', [
+    'amount' => 10000,
+    'description' => 'Order #12345'
+]);
+
+$formUrl = $response->json('formUrl');
+
+// Step 2: Redirect to Payment Page
+return redirect($formUrl);
+
+// Step 3: Callback Handler
+public function paymentCallback(Request $request)
+{
+    $orderId = $request->input('ID');
+    $callbackStatus = $request->input('STATUS'); // May be temporary!
+    
+    // IMPORTANT: Always verify the status
+    $response = Http::get("https://your-api.com/api/orders/{$orderId}/simple-status");
+    $verifiedStatus = $response->json('order.status');
+    
+    if ($verifiedStatus === 'FullyPaid') {
+        // Process successful payment
+        return view('payment.success');
+    } else if ($verifiedStatus === 'Declined') {
+        // Handle declined payment
+        return view('payment.declined');
+    } else {
+        // Handle other statuses
+        return view('payment.pending');
+    }
+}
+```
+
+---
+
 ## 🏗️ Project Structure
 
 ```
